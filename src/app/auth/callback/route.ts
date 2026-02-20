@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
+  // Always redirect to root URL after login, ignoring any redirect query parameters
   const next = '/'
 
   if (code) {
