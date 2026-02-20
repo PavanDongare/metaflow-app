@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "tenant": {
+    "id": "00000000-0000-0000-0000-000000000001",
+    "name": "Default Tenant",
+    "slug": "default"
+  },
+  "app": {
+    "name": "Generated App",
+    "description": "Generated from prompt: Cleaning company SOP app: pipeline object Cleaning Job with status picklist [Assigned, En Route, On Site, Cleaning, QA Check, Completed]. Include staff tracking and manager oversight actions: start travel, check in on site, start cleaning, submit QA, mark complete, reopen issue. Every transition action must have status precondition and status transition."
+  },
+  "objectTypes": [],
+  "relationships": [],
+  "actions": [],
+  "processLayouts": []
+}

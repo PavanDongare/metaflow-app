@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "tenant": {
+    "id": "00000000-0000-0000-0000-000000000001",
+    "name": "Default Tenant",
+    "slug": "default"
+  },
+  "app": {
+    "name": "Generated App",
+    "description": "Generated from prompt: Help me make a Jira Kanban board"
+  },
+  "objectTypes": [
+    {
+      "symbolicId": "$issue",
+      "displayName": "Issue",
+      "config": {
+        "titleKey": "title",
+        "primaryKey": "id",
+        "properties": {
+          "status": {
+            "displayName": "Status",
+            "type": "string",
+            "required": true,
+            "picklistConfig": {
+              "allowMultiple": false,
+              "options": [
+                "To Do",
+                "In Progress",
+                "Done"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "symbolicId": "$user",
+      "displayName": "User",
+      "config": {
+        "titleKey": "name",
+        "primaryKey": "id",
+        "properties": {
+          "name": {
+            "displayName": "Name",
+            "type": "string",
+            "required": true
+          }
+        }
+      }
+    }
+  ],
+  "relationships": [],
+  "actions": [
+    {
+      "displayName": "Start Progress",
+      "description": "Move issue to In Progress",
+      "objectTypeId": "$issue",
+      "symbolicId": "$action_1"
+    }
+  ],
+  "processLayouts": [
+    {
+      "symbolicId": "$process_issue",
+      "processName": "Issue Workflow",
+      "objectTypeIds": [
+        "$issue"
+      ],
+      "trackedPicklists": [
+        "status"
+      ],
+      "stages": [
+        {
+          "id": "To Do",
+          "label": "To Do",
+          "value": "To Do"
+        },
+        {
+          "id": "In Progress",
+          "label": "In Progress",
+          "value": "In Progress"
+        },
+        {
+          "id": "Done",
+          "label": "Done",
+          "value": "Done"
+        }
+      ],
+      "actionIds": [],
+      "layoutData": {},
+      "stageCount": 3
+    }
+  ]
+}

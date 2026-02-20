@@ -1,0 +1,258 @@
+{
+  "version": 1,
+  "tenant": {
+    "id": "00000000-0000-0000-0000-000000000001",
+    "name": "Default Tenant",
+    "slug": "default"
+  },
+  "app": {
+    "name": "Generated App",
+    "description": "Generated from prompt: Build a professional Kanban board process for work management with states To Do, Doing, Done, and practical business-grade actions, rules, and state transitions."
+  },
+  "objectTypes": [
+    {
+      "symbolicId": "$workItem",
+      "displayName": "Work Item",
+      "config": {
+        "titleKey": "title",
+        "primaryKey": "id",
+        "properties": {
+          "title": {
+            "type": "string",
+            "required": true,
+            "displayName": "Title"
+          },
+          "description": {
+            "type": "string",
+            "required": false,
+            "displayName": "Description"
+          },
+          "status": {
+            "displayName": "Status",
+            "type": "string",
+            "required": true,
+            "picklistConfig": {
+              "allowMultiple": false,
+              "options": [
+                "To Do",
+                "Doing",
+                "Done"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "symbolicId": "$contact",
+      "displayName": "Contact",
+      "config": {
+        "titleKey": "name",
+        "primaryKey": "id",
+        "properties": {
+          "name": {
+            "displayName": "Name",
+            "type": "string",
+            "required": true
+          }
+        }
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "sourceObjectTypeId": "$workItem",
+      "targetObjectTypeId": "$contact",
+      "relationshipType": "ONE_TO_MANY",
+      "propertyName": "assignee",
+      "config": {
+        "notes": "Assignment of work items to contacts"
+      },
+      "symbolicId": "$relationship_1",
+      "cardinality": "ONE_TO_MANY",
+      "displayName": "Relationship 1",
+      "sourceDisplayName": "WorkItem",
+      "targetDisplayName": "Contact"
+    }
+  ],
+  "actions": [
+    {
+      "displayName": "Start Work",
+      "config": {
+        "executionType": "declarative",
+        "parameters": [
+          {
+            "name": "workItem",
+            "type": "object-reference",
+            "required": true,
+            "displayName": "Work Item",
+            "objectTypeId": "$workItem"
+          }
+        ],
+        "rules": [
+          {
+            "type": "modify_object",
+            "properties": {
+              "status": {
+                "value": "Doing",
+                "source": "static"
+              },
+              "lastActivityAt": {
+                "source": "current_timestamp"
+              }
+            },
+            "objectParameter": "workItem"
+          }
+        ],
+        "submissionCriteria": [
+          {
+            "type": "comparison",
+            "left": {
+              "type": "property",
+              "path": {
+                "baseParameterName": "workItem",
+                "segments": [],
+                "terminalPropertyKey": "status"
+              }
+            },
+            "operator": "=",
+            "right": {
+              "type": "static",
+              "value": "To Do"
+            }
+          }
+        ]
+      },
+      "symbolicId": "$action_1"
+    },
+    {
+      "displayName": "Complete Work",
+      "config": {
+        "executionType": "declarative",
+        "parameters": [
+          {
+            "name": "workItem",
+            "type": "object-reference",
+            "required": true,
+            "displayName": "Work Item",
+            "objectTypeId": "$workItem"
+          }
+        ],
+        "rules": [
+          {
+            "type": "modify_object",
+            "properties": {
+              "status": {
+                "value": "Done",
+                "source": "static"
+              },
+              "lastActivityAt": {
+                "source": "current_timestamp"
+              }
+            },
+            "objectParameter": "workItem"
+          }
+        ],
+        "submissionCriteria": [
+          {
+            "type": "comparison",
+            "left": {
+              "type": "property",
+              "path": {
+                "baseParameterName": "workItem",
+                "segments": [],
+                "terminalPropertyKey": "status"
+              }
+            },
+            "operator": "=",
+            "right": {
+              "type": "static",
+              "value": "Doing"
+            }
+          }
+        ]
+      },
+      "symbolicId": "$action_2"
+    },
+    {
+      "displayName": "Reopen Work",
+      "config": {
+        "executionType": "declarative",
+        "parameters": [
+          {
+            "name": "workItem",
+            "type": "object-reference",
+            "required": true,
+            "displayName": "Work Item",
+            "objectTypeId": "$workItem"
+          }
+        ],
+        "rules": [
+          {
+            "type": "modify_object",
+            "properties": {
+              "status": {
+                "value": "To Do",
+                "source": "static"
+              },
+              "lastActivityAt": {
+                "source": "current_timestamp"
+              }
+            },
+            "objectParameter": "workItem"
+          }
+        ],
+        "submissionCriteria": [
+          {
+            "type": "comparison",
+            "left": {
+              "type": "property",
+              "path": {
+                "baseParameterName": "workItem",
+                "segments": [],
+                "terminalPropertyKey": "status"
+              }
+            },
+            "operator": "=",
+            "right": {
+              "type": "static",
+              "value": "Done"
+            }
+          }
+        ]
+      },
+      "symbolicId": "$action_3"
+    }
+  ],
+  "processLayouts": [
+    {
+      "symbolicId": "$process_workItem",
+      "processName": "WorkItem Workflow",
+      "objectTypeIds": [
+        "$workItem"
+      ],
+      "trackedPicklists": [
+        "status"
+      ],
+      "stages": [
+        {
+          "id": "To Do",
+          "label": "To Do",
+          "value": "To Do"
+        },
+        {
+          "id": "Doing",
+          "label": "Doing",
+          "value": "Doing"
+        },
+        {
+          "id": "Done",
+          "label": "Done",
+          "value": "Done"
+        }
+      ],
+      "actionIds": [],
+      "layoutData": {}
+    }
+  ]
+}

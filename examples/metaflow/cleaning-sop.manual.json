@@ -1,0 +1,252 @@
+{
+  "version": 1,
+  "tenant": {
+    "id": "00000000-0000-0000-0000-000000000001",
+    "name": "Default Tenant",
+    "slug": "default"
+  },
+  "app": {
+    "name": "Cleaning SOP Workflow",
+    "description": "Professional cleaning operations workflow for staff execution and manager tracking"
+  },
+  "objectTypes": [
+    {
+      "symbolicId": "$cleaning_job",
+      "displayName": "Cleaning Job",
+      "config": {
+        "titleKey": "jobTitle",
+        "primaryKey": "id",
+        "properties": {
+          "jobTitle": { "type": "string", "required": true, "displayName": "Job Title" },
+          "customerName": { "type": "string", "required": true, "displayName": "Customer Name" },
+          "siteAddress": { "type": "string", "required": true, "displayName": "Site Address" },
+          "scheduledDate": { "type": "date", "required": true, "displayName": "Scheduled Date" },
+          "checklistCompleted": { "type": "boolean", "required": false, "displayName": "Checklist Completed" },
+          "qaNotes": { "type": "string", "required": false, "displayName": "QA Notes" },
+          "status": {
+            "type": "string",
+            "required": true,
+            "displayName": "Status",
+            "picklistConfig": {
+              "allowMultiple": false,
+              "defaultValue": "Assigned",
+              "options": ["Assigned", "En Route", "On Site", "Cleaning", "QA Check", "Completed"]
+            }
+          }
+        }
+      }
+    },
+    {
+      "symbolicId": "$staff_member",
+      "displayName": "Staff Member",
+      "config": {
+        "titleKey": "fullName",
+        "primaryKey": "id",
+        "properties": {
+          "fullName": { "type": "string", "required": true, "displayName": "Full Name" },
+          "phone": { "type": "string", "required": false, "displayName": "Phone" },
+          "role": {
+            "type": "string",
+            "required": false,
+            "displayName": "Role",
+            "picklistConfig": {
+              "allowMultiple": false,
+              "options": ["Cleaner", "Supervisor", "QA"]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "symbolicId": "$job_staff",
+      "displayName": "Job Staff Assignment",
+      "cardinality": "ONE_TO_MANY",
+      "sourceObjectTypeId": "$cleaning_job",
+      "targetObjectTypeId": "$staff_member",
+      "sourceDisplayName": "Cleaning Job",
+      "targetDisplayName": "Staff Member",
+      "propertyName": "assignedStaff",
+      "config": {}
+    }
+  ],
+  "actions": [
+    {
+      "symbolicId": "$start_travel",
+      "displayName": "Start Travel",
+      "config": {
+        "executionType": "declarative",
+        "parameters": [
+          { "name": "job", "type": "object-reference", "required": true, "displayName": "Cleaning Job", "objectTypeId": "$cleaning_job" }
+        ],
+        "rules": [
+          {
+            "type": "modify_object",
+            "objectParameter": "job",
+            "properties": {
+              "status": { "source": "static", "value": "En Route" }
+            }
+          }
+        ],
+        "submissionCriteria": [
+          {
+            "type": "comparison",
+            "left": { "type": "property", "path": { "baseParameterName": "job", "segments": [], "terminalPropertyKey": "status" } },
+            "operator": "=",
+            "right": { "type": "static", "value": "Assigned" }
+          }
+        ]
+      }
+    },
+    {
+      "symbolicId": "$check_in_site",
+      "displayName": "Check In On Site",
+      "config": {
+        "executionType": "declarative",
+        "parameters": [
+          { "name": "job", "type": "object-reference", "required": true, "displayName": "Cleaning Job", "objectTypeId": "$cleaning_job" }
+        ],
+        "rules": [
+          {
+            "type": "modify_object",
+            "objectParameter": "job",
+            "properties": {
+              "status": { "source": "static", "value": "On Site" }
+            }
+          }
+        ],
+        "submissionCriteria": [
+          {
+            "type": "comparison",
+            "left": { "type": "property", "path": { "baseParameterName": "job", "segments": [], "terminalPropertyKey": "status" } },
+            "operator": "=",
+            "right": { "type": "static", "value": "En Route" }
+          }
+        ]
+      }
+    },
+    {
+      "symbolicId": "$start_cleaning",
+      "displayName": "Start Cleaning",
+      "config": {
+        "executionType": "declarative",
+        "parameters": [
+          { "name": "job", "type": "object-reference", "required": true, "displayName": "Cleaning Job", "objectTypeId": "$cleaning_job" }
+        ],
+        "rules": [
+          {
+            "type": "modify_object",
+            "objectParameter": "job",
+            "properties": {
+              "status": { "source": "static", "value": "Cleaning" }
+            }
+          }
+        ],
+        "submissionCriteria": [
+          {
+            "type": "comparison",
+            "left": { "type": "property", "path": { "baseParameterName": "job", "segments": [], "terminalPropertyKey": "status" } },
+            "operator": "=",
+            "right": { "type": "static", "value": "On Site" }
+          }
+        ]
+      }
+    },
+    {
+      "symbolicId": "$submit_qa",
+      "displayName": "Submit For QA",
+      "config": {
+        "executionType": "declarative",
+        "parameters": [
+          { "name": "job", "type": "object-reference", "required": true, "displayName": "Cleaning Job", "objectTypeId": "$cleaning_job" }
+        ],
+        "rules": [
+          {
+            "type": "modify_object",
+            "objectParameter": "job",
+            "properties": {
+              "status": { "source": "static", "value": "QA Check" },
+              "checklistCompleted": { "source": "static", "value": true }
+            }
+          }
+        ],
+        "submissionCriteria": [
+          {
+            "type": "comparison",
+            "left": { "type": "property", "path": { "baseParameterName": "job", "segments": [], "terminalPropertyKey": "status" } },
+            "operator": "=",
+            "right": { "type": "static", "value": "Cleaning" }
+          }
+        ]
+      }
+    },
+    {
+      "symbolicId": "$mark_completed",
+      "displayName": "Mark Completed",
+      "config": {
+        "executionType": "declarative",
+        "parameters": [
+          { "name": "job", "type": "object-reference", "required": true, "displayName": "Cleaning Job", "objectTypeId": "$cleaning_job" }
+        ],
+        "rules": [
+          {
+            "type": "modify_object",
+            "objectParameter": "job",
+            "properties": {
+              "status": { "source": "static", "value": "Completed" }
+            }
+          }
+        ],
+        "submissionCriteria": [
+          {
+            "type": "comparison",
+            "left": { "type": "property", "path": { "baseParameterName": "job", "segments": [], "terminalPropertyKey": "status" } },
+            "operator": "=",
+            "right": { "type": "static", "value": "QA Check" }
+          }
+        ]
+      }
+    },
+    {
+      "symbolicId": "$reopen_job",
+      "displayName": "Reopen Job",
+      "config": {
+        "executionType": "declarative",
+        "parameters": [
+          { "name": "job", "type": "object-reference", "required": true, "displayName": "Cleaning Job", "objectTypeId": "$cleaning_job" }
+        ],
+        "rules": [
+          {
+            "type": "modify_object",
+            "objectParameter": "job",
+            "properties": {
+              "status": { "source": "static", "value": "Cleaning" }
+            }
+          }
+        ],
+        "submissionCriteria": [
+          {
+            "type": "comparison",
+            "left": { "type": "property", "path": { "baseParameterName": "job", "segments": [], "terminalPropertyKey": "status" } },
+            "operator": "=",
+            "right": { "type": "static", "value": "QA Check" }
+          }
+        ]
+      }
+    }
+  ],
+  "processLayouts": [
+    {
+      "symbolicId": "$cleaning_sop_process",
+      "processName": "Cleaning SOP Workflow",
+      "objectTypeIds": ["$cleaning_job"],
+      "trackedPicklists": ["status"],
+      "layoutData": {
+        "version": 1,
+        "nodes": [],
+        "edges": []
+      }
+    }
+  ]
+}

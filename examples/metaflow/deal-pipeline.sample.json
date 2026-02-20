@@ -1,0 +1,752 @@
+{
+  "version": 1,
+  "tenant": {
+    "id": "00000000-0000-0000-0000-000000000001",
+    "name": "Demo Tenant",
+    "slug": "demo"
+  },
+  "app": {
+    "name": "Deal Pipeline",
+    "description": "Sales pipeline with status transitions and a backed many-to-many deal-contact relationship."
+  },
+  "objectTypes": [
+    {
+      "symbolicId": "$deal",
+      "displayName": "Deal",
+      "config": {
+        "titleKey": "name",
+        "primaryKey": "id",
+        "properties": {
+          "name": {
+            "displayName": "Deal Name",
+            "type": "string",
+            "required": true
+          },
+          "status": {
+            "displayName": "Status",
+            "type": "string",
+            "required": true,
+            "picklistConfig": {
+              "allowMultiple": false,
+              "options": [
+                "Lead",
+                "Qualified",
+                "Proposal",
+                "Negotiation",
+                "Won",
+                "Lost"
+              ],
+              "defaultValue": "Lead"
+            }
+          },
+          "amount": {
+            "displayName": "Amount",
+            "type": "number",
+            "required": false,
+            "validation": {
+              "min": 0
+            }
+          },
+          "priority": {
+            "displayName": "Priority",
+            "type": "string",
+            "required": false,
+            "picklistConfig": {
+              "allowMultiple": false,
+              "options": [
+                "Low",
+                "Medium",
+                "High"
+              ],
+              "defaultValue": "Medium"
+            }
+          },
+          "nextStep": {
+            "displayName": "Next Step",
+            "type": "string",
+            "required": false
+          },
+          "probability": {
+            "displayName": "Probability",
+            "type": "number",
+            "required": false,
+            "validation": {
+              "min": 0,
+              "max": 100
+            }
+          },
+          "closeReason": {
+            "displayName": "Close Reason",
+            "type": "string",
+            "required": false
+          },
+          "lastActivityAt": {
+            "displayName": "Last Activity At",
+            "type": "timestamp",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "symbolicId": "$company",
+      "displayName": "Company",
+      "config": {
+        "titleKey": "name",
+        "primaryKey": "id",
+        "properties": {
+          "name": {
+            "displayName": "Company Name",
+            "type": "string",
+            "required": true
+          },
+          "industry": {
+            "displayName": "Industry",
+            "type": "string",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "symbolicId": "$contact",
+      "displayName": "Contact",
+      "config": {
+        "titleKey": "fullName",
+        "primaryKey": "id",
+        "properties": {
+          "fullName": {
+            "displayName": "Full Name",
+            "type": "string",
+            "required": true
+          },
+          "email": {
+            "displayName": "Email",
+            "type": "string",
+            "required": false
+          }
+        }
+      }
+    },
+    {
+      "symbolicId": "$deal_contact_link",
+      "displayName": "Deal Contact Link",
+      "config": {
+        "titleKey": "role",
+        "primaryKey": "id",
+        "isJunction": true,
+        "junctionMetadata": {
+          "relationshipId": "$deal_contacts",
+          "sourceObjectTypeId": "$deal",
+          "targetObjectTypeId": "$contact"
+        },
+        "properties": {
+          "dealId": {
+            "displayName": "Deal",
+            "type": "object-reference",
+            "required": true,
+            "referenceConfig": {
+              "targetObjectTypeId": "$deal"
+            }
+          },
+          "contactId": {
+            "displayName": "Contact",
+            "type": "object-reference",
+            "required": true,
+            "referenceConfig": {
+              "targetObjectTypeId": "$contact"
+            }
+          },
+          "role": {
+            "displayName": "Role",
+            "type": "string",
+            "required": true,
+            "picklistConfig": {
+              "allowMultiple": false,
+              "options": [
+                "Decision Maker",
+                "Champion",
+                "Influencer"
+              ]
+            }
+          },
+          "isPrimaryDecisionMaker": {
+            "displayName": "Primary Decision Maker",
+            "type": "boolean",
+            "required": false
+          }
+        }
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "symbolicId": "$company_deals",
+      "displayName": "Company has Deals",
+      "cardinality": "ONE_TO_MANY",
+      "sourceObjectTypeId": "$company",
+      "targetObjectTypeId": "$deal",
+      "sourceDisplayName": "company",
+      "targetDisplayName": "deals",
+      "propertyName": "companyId",
+      "config": {
+        "notes": "Each deal belongs to one company"
+      }
+    },
+    {
+      "symbolicId": "$deal_contacts",
+      "displayName": "Deal Contacts",
+      "cardinality": "MANY_TO_MANY",
+      "sourceObjectTypeId": "$deal",
+      "targetObjectTypeId": "$contact",
+      "sourceDisplayName": "deal",
+      "targetDisplayName": "contacts",
+      "junctionObjectTypeId": "$deal_contact_link",
+      "config": {
+        "notes": "Backed by junction entity with role metadata"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "symbolicId": "$qualify_deal",
+      "displayName": "Qualify Deal",
+      "config": {
+        "executionType": "declarative",
+        "description": "Transitions Deal from \"Lead\" to \"Qualified\" with additional business updates",
+        "parameters": [
+          {
+            "name": "deal",
+            "type": "object-reference",
+            "displayName": "Deal",
+            "required": true,
+            "objectTypeId": "$deal"
+          },
+          {
+            "name": "discoveryNotes",
+            "type": "string",
+            "displayName": "Discovery Notes",
+            "required": true
+          },
+          {
+            "name": "priority",
+            "type": "string",
+            "displayName": "Priority",
+            "required": false,
+            "picklistConfig": {
+              "allowMultiple": false,
+              "options": [
+                "Low",
+                "Medium",
+                "High"
+              ]
+            }
+          }
+        ],
+        "submissionCriteria": [
+          {
+            "type": "comparison",
+            "left": {
+              "type": "property",
+              "path": {
+                "baseParameterName": "deal",
+                "segments": [],
+                "terminalPropertyKey": "status"
+              }
+            },
+            "operator": "=",
+            "right": {
+              "type": "static",
+              "value": "Lead"
+            }
+          }
+        ],
+        "rules": [
+          {
+            "type": "modify_object",
+            "objectParameter": "deal",
+            "properties": {
+              "status": {
+                "source": "static",
+                "value": "Qualified"
+              },
+              "lastActivityAt": {
+                "source": "current_timestamp"
+              },
+              "nextStep": {
+                "source": "parameter",
+                "parameterName": "discoveryNotes"
+              },
+              "priority": {
+                "source": "parameter",
+                "parameterName": "priority"
+              },
+              "probability": {
+                "source": "static",
+                "value": 25
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "symbolicId": "$create_proposal",
+      "displayName": "Create Proposal",
+      "config": {
+        "executionType": "declarative",
+        "description": "Transitions Deal from \"Qualified\" to \"Proposal\" with additional business updates",
+        "parameters": [
+          {
+            "name": "deal",
+            "type": "object-reference",
+            "displayName": "Deal",
+            "required": true,
+            "objectTypeId": "$deal"
+          },
+          {
+            "name": "proposedAmount",
+            "type": "number",
+            "displayName": "Proposed Amount",
+            "required": true
+          },
+          {
+            "name": "proposalSummary",
+            "type": "string",
+            "displayName": "Proposal Summary",
+            "required": true
+          }
+        ],
+        "submissionCriteria": [
+          {
+            "type": "comparison",
+            "left": {
+              "type": "property",
+              "path": {
+                "baseParameterName": "deal",
+                "segments": [],
+                "terminalPropertyKey": "status"
+              }
+            },
+            "operator": "=",
+            "right": {
+              "type": "static",
+              "value": "Qualified"
+            }
+          }
+        ],
+        "rules": [
+          {
+            "type": "modify_object",
+            "objectParameter": "deal",
+            "properties": {
+              "status": {
+                "source": "static",
+                "value": "Proposal"
+              },
+              "lastActivityAt": {
+                "source": "current_timestamp"
+              },
+              "amount": {
+                "source": "parameter",
+                "parameterName": "proposedAmount"
+              },
+              "nextStep": {
+                "source": "parameter",
+                "parameterName": "proposalSummary"
+              },
+              "probability": {
+                "source": "static",
+                "value": 50
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "symbolicId": "$start_negotiation",
+      "displayName": "Start Negotiation",
+      "config": {
+        "executionType": "declarative",
+        "description": "Transitions Deal from \"Proposal\" to \"Negotiation\" with additional business updates",
+        "parameters": [
+          {
+            "name": "deal",
+            "type": "object-reference",
+            "displayName": "Deal",
+            "required": true,
+            "objectTypeId": "$deal"
+          },
+          {
+            "name": "negotiationPlan",
+            "type": "string",
+            "displayName": "Negotiation Plan",
+            "required": true
+          }
+        ],
+        "submissionCriteria": [
+          {
+            "type": "comparison",
+            "left": {
+              "type": "property",
+              "path": {
+                "baseParameterName": "deal",
+                "segments": [],
+                "terminalPropertyKey": "status"
+              }
+            },
+            "operator": "=",
+            "right": {
+              "type": "static",
+              "value": "Proposal"
+            }
+          }
+        ],
+        "rules": [
+          {
+            "type": "modify_object",
+            "objectParameter": "deal",
+            "properties": {
+              "status": {
+                "source": "static",
+                "value": "Negotiation"
+              },
+              "lastActivityAt": {
+                "source": "current_timestamp"
+              },
+              "nextStep": {
+                "source": "parameter",
+                "parameterName": "negotiationPlan"
+              },
+              "probability": {
+                "source": "static",
+                "value": 70
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "symbolicId": "$close_won",
+      "displayName": "Close Won",
+      "config": {
+        "executionType": "declarative",
+        "description": "Transitions Deal from \"Negotiation\" to \"Won\" with additional business updates",
+        "parameters": [
+          {
+            "name": "deal",
+            "type": "object-reference",
+            "displayName": "Deal",
+            "required": true,
+            "objectTypeId": "$deal"
+          },
+          {
+            "name": "finalAmount",
+            "type": "number",
+            "displayName": "Final Amount",
+            "required": true
+          }
+        ],
+        "submissionCriteria": [
+          {
+            "type": "comparison",
+            "left": {
+              "type": "property",
+              "path": {
+                "baseParameterName": "deal",
+                "segments": [],
+                "terminalPropertyKey": "status"
+              }
+            },
+            "operator": "=",
+            "right": {
+              "type": "static",
+              "value": "Negotiation"
+            }
+          }
+        ],
+        "rules": [
+          {
+            "type": "modify_object",
+            "objectParameter": "deal",
+            "properties": {
+              "status": {
+                "source": "static",
+                "value": "Won"
+              },
+              "lastActivityAt": {
+                "source": "current_timestamp"
+              },
+              "amount": {
+                "source": "parameter",
+                "parameterName": "finalAmount"
+              },
+              "probability": {
+                "source": "static",
+                "value": 100
+              },
+              "nextStep": {
+                "source": "static",
+                "value": "Onboard customer"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "symbolicId": "$close_lost",
+      "displayName": "Close Lost",
+      "config": {
+        "executionType": "declarative",
+        "description": "Transitions Deal from \"Negotiation\" to \"Lost\" with additional business updates",
+        "parameters": [
+          {
+            "name": "deal",
+            "type": "object-reference",
+            "displayName": "Deal",
+            "required": true,
+            "objectTypeId": "$deal"
+          },
+          {
+            "name": "lossReason",
+            "type": "string",
+            "displayName": "Loss Reason",
+            "required": true
+          }
+        ],
+        "submissionCriteria": [
+          {
+            "type": "comparison",
+            "left": {
+              "type": "property",
+              "path": {
+                "baseParameterName": "deal",
+                "segments": [],
+                "terminalPropertyKey": "status"
+              }
+            },
+            "operator": "=",
+            "right": {
+              "type": "static",
+              "value": "Negotiation"
+            }
+          }
+        ],
+        "rules": [
+          {
+            "type": "modify_object",
+            "objectParameter": "deal",
+            "properties": {
+              "status": {
+                "source": "static",
+                "value": "Lost"
+              },
+              "lastActivityAt": {
+                "source": "current_timestamp"
+              },
+              "closeReason": {
+                "source": "parameter",
+                "parameterName": "lossReason"
+              },
+              "probability": {
+                "source": "static",
+                "value": 0
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "symbolicId": "$log_followup_note",
+      "displayName": "Log Follow-up Note",
+      "config": {
+        "executionType": "declarative",
+        "description": "Adds next-step note and updates activity timestamp without stage transition",
+        "parameters": [
+          {
+            "name": "deal",
+            "type": "object-reference",
+            "displayName": "Deal",
+            "required": true,
+            "objectTypeId": "$deal"
+          },
+          {
+            "name": "note",
+            "type": "string",
+            "displayName": "Follow-up Note",
+            "required": true
+          }
+        ],
+        "rules": [
+          {
+            "type": "modify_object",
+            "objectParameter": "deal",
+            "properties": {
+              "nextStep": {
+                "source": "parameter",
+                "parameterName": "note"
+              },
+              "lastActivityAt": {
+                "source": "current_timestamp"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "symbolicId": "$link_contact_to_deal",
+      "displayName": "Link Contact To Deal",
+      "config": {
+        "executionType": "declarative",
+        "description": "Create a deal-contact link row with relationship metadata",
+        "parameters": [
+          {
+            "name": "deal",
+            "type": "object-reference",
+            "displayName": "Deal",
+            "required": true,
+            "objectTypeId": "$deal"
+          },
+          {
+            "name": "contact",
+            "type": "object-reference",
+            "displayName": "Contact",
+            "required": true,
+            "objectTypeId": "$contact"
+          },
+          {
+            "name": "role",
+            "type": "string",
+            "displayName": "Role",
+            "required": true,
+            "picklistConfig": {
+              "allowMultiple": false,
+              "options": [
+                "Decision Maker",
+                "Champion",
+                "Influencer"
+              ]
+            }
+          },
+          {
+            "name": "isPrimaryDecisionMaker",
+            "type": "boolean",
+            "displayName": "Primary Decision Maker",
+            "required": false
+          }
+        ],
+        "submissionCriteria": [
+          {
+            "type": "logical",
+            "operator": "OR",
+            "expressions": [
+              {
+                "type": "comparison",
+                "left": {
+                  "type": "property",
+                  "path": {
+                    "baseParameterName": "deal",
+                    "segments": [],
+                    "terminalPropertyKey": "status"
+                  }
+                },
+                "operator": "=",
+                "right": {
+                  "type": "static",
+                  "value": "Qualified"
+                }
+              },
+              {
+                "type": "comparison",
+                "left": {
+                  "type": "property",
+                  "path": {
+                    "baseParameterName": "deal",
+                    "segments": [],
+                    "terminalPropertyKey": "status"
+                  }
+                },
+                "operator": "=",
+                "right": {
+                  "type": "static",
+                  "value": "Proposal"
+                }
+              },
+              {
+                "type": "comparison",
+                "left": {
+                  "type": "property",
+                  "path": {
+                    "baseParameterName": "deal",
+                    "segments": [],
+                    "terminalPropertyKey": "status"
+                  }
+                },
+                "operator": "=",
+                "right": {
+                  "type": "static",
+                  "value": "Negotiation"
+                }
+              }
+            ]
+          }
+        ],
+        "rules": [
+          {
+            "type": "create_object",
+            "objectTypeId": "$deal_contact_link",
+            "properties": {
+              "dealId": {
+                "source": "parameter",
+                "parameterName": "deal"
+              },
+              "contactId": {
+                "source": "parameter",
+                "parameterName": "contact"
+              },
+              "role": {
+                "source": "parameter",
+                "parameterName": "role"
+              },
+              "isPrimaryDecisionMaker": {
+                "source": "parameter",
+                "parameterName": "isPrimaryDecisionMaker"
+              }
+            }
+          },
+          {
+            "type": "modify_object",
+            "objectParameter": "deal",
+            "properties": {
+              "lastActivityAt": {
+                "source": "current_timestamp"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "processLayouts": [
+    {
+      "symbolicId": "$deal_pipeline_layout",
+      "processName": "Deal Pipeline",
+      "objectTypeIds": [
+        "$deal"
+      ],
+      "trackedPicklists": [
+        "status"
+      ],
+      "layoutData": {
+        "version": 1,
+        "nodes": [],
+        "edges": []
+      }
+    }
+  ]
+}

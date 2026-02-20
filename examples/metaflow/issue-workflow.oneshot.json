@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "tenant": {
+    "id": "00000000-0000-0000-0000-000000000001",
+    "name": "Default Tenant",
+    "slug": "default"
+  },
+  "app": {
+    "name": "Generated App",
+    "description": "Generated from prompt: Using the full Deal Pipeline reference schema as the template, generate an equivalent Issue workflow schema in one shot for a tracked issue flow with statuses To Do, Doing, Done. Follow the same schema shape and completeness as closely as possible, including realistic actions with parameters, rules, and state-based submission criteria."
+  },
+  "objectTypes": [
+    {
+      "symbolicId": "$issue",
+      "displayName": "Issue",
+      "config": {
+        "titleKey": "name",
+        "primaryKey": "id",
+        "properties": {
+          "name": {
+            "displayName": "Name",
+            "type": "string",
+            "required": true
+          }
+        }
+      }
+    }
+  ],
+  "relationships": [],
+  "actions": [],
+  "processLayouts": [
+    {
+      "symbolicId": "$process_issue_workflow",
+      "processName": "Issue Workflow",
+      "objectTypeIds": [
+        "$issue"
+      ],
+      "trackedPicklists": [
+        "status"
+      ],
+      "layoutData": {
+        "edges": [],
+        "nodes": [],
+        "version": 1
+      }
+    }
+  ]
+}
