@@ -8,7 +8,11 @@ import { getURL } from '@/lib/utils'
 
 export async function signIn(formData: FormData) {
   const supabase = await createClient()
-  const origin = (await headers()).get('origin') || ''
+  const headerList = await headers()
+  const host = headerList.get('x-forwarded-host') || headerList.get('host') || ''
+  const proto = headerList.get('x-forwarded-proto') || 'http'
+  const origin = host ? `${proto}://${host}` : ''
+
   const email = formData.get('email') as string
 
   const { error } = await supabase.auth.signInWithOtp({
