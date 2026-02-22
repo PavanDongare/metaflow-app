@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { OriginInput } from '@/components/auth/origin-input'
 import { DemoButton } from '@/components/demo-button'
 
 export default async function SignupPage({
@@ -63,6 +64,7 @@ export default async function SignupPage({
               )}
 
               <form className="space-y-4">
+                <OriginInput />
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input

@@ -23,4 +23,3 @@ export function getURL(origin?: string) {
   url = url.replace(/\/+$/, '')
   return url
 }
-

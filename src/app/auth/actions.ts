@@ -13,7 +13,8 @@ export async function signIn(formData: FormData) {
   const proto = headerList.get('x-forwarded-proto') || 'https'
   const referer = headerList.get('referer')
   
-  let origin = host ? `${proto}://${host}` : ''
+  const formOrigin = formData.get('origin') as string
+  let origin = formOrigin || (host ? `${proto}://${host}` : '')
   
   if (!origin && referer) {
     try {
@@ -30,6 +31,7 @@ export async function signIn(formData: FormData) {
     email,
     options: {
       emailRedirectTo: `${getURL(origin)}/auth/callback`,
+      redirectTo: `${getURL(origin)}/auth/callback`,
     },
   })
 
