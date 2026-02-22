@@ -19,8 +19,8 @@ export function getURL(origin?: string) {
 
   // Make sure to include http(s)://
   url = url.startsWith('http') ? url : `https://${url}`
-  // Make sure to include trailing /
-  url = url.endsWith('/') ? url : `${url}/`
+  // Remove trailing slash if it exists
+  url = url.replace(/\/+$/, '')
   return url
 }
 
