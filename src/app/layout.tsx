@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { MetaflowShell } from "./components/metaflow-shell";
+import { getUserContext } from "@/lib/auth/get-user-context";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -25,15 +26,17 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const userContext = await getUserContext();
+
   return (
     <html lang="en">
       <body className="antialiased h-screen">
-        <MetaflowShell>{children}</MetaflowShell>
+        <MetaflowShell userContext={userContext}>{children}</MetaflowShell>
       </body>
     </html>
   );
