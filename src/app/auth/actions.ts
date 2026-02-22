@@ -3,25 +3,6 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { getURL } from '@/lib/utils'
-
-export async function signIn(formData: FormData) {
-  const supabase = await createClient()
-  const email = formData.get('email') as string
-
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: {
-      emailRedirectTo: `${getURL()}auth/callback`,
-    },
-  })
-
-  if (error) {
-    redirect('/auth/login?error=' + encodeURIComponent(error.message))
-  }
-
-  redirect('/auth/login?message=Check your email for the login link')
-}
 
 export async function signout() {
   const supabase = await createClient()

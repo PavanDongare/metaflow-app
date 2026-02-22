@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { LoginForm } from '@/components/auth/login-form'
 import { DemoButton } from '@/components/demo-button'
 
 export default async function LoginPage({
@@ -18,7 +19,7 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ error?: string; message?: string }>
 }) {
-  const { error, message } = await searchParams
+  const { error: initialError, message: initialMessage } = await searchParams
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
@@ -50,34 +51,7 @@ export default async function LoginPage({
             </CardHeader>
 
             <CardContent>
-              {error && (
-                <div className="mb-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                  {error}
-                </div>
-              )}
-
-              {message && (
-                <div className="mb-4 rounded-md bg-green-500/10 p-3 text-sm text-green-600 dark:text-green-400">
-                  {message}
-                </div>
-              )}
-
-              <form className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    required
-                  />
-                </div>
-
-                <Button formAction={signIn} className="w-full">
-                  Send Magic Link
-                </Button>
-              </form>
+              <LoginForm />
 
               <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
