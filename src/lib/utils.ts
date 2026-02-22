@@ -7,19 +7,18 @@ export function cn(...inputs: ClassValue[]) {
 
 /**
  * Gets the base URL for the application dynamically.
- * Works for localhost, Vercel preview deployments, and production.
+ * Follows official Supabase recommendation for Next.js/Vercel.
  */
-export function getURL(origin?: string) {
+export function getURL() {
   let url =
-    origin && origin.trim() !== ''
-      ? origin
-      : process.env.NEXT_PUBLIC_SITE_URL ??
-        process.env.NEXT_PUBLIC_VERCEL_URL ??
-        'http://localhost:3000'
-
-  // Make sure to include http(s)://
+    process?.env?.NEXT_PUBLIC_SITE_URL ?? // Set this to your site URL in production env.
+    process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel.
+    'http://localhost:3000/'
+  
+  // Make sure to include `https://` when not localhost.
   url = url.startsWith('http') ? url : `https://${url}`
-  // Remove trailing slash if it exists
-  url = url.replace(/\/+$/, '')
+  // Make sure to include a trailing `/`.
+  url = url.endsWith('/') ? url : `${url}/`
+  
   return url
 }

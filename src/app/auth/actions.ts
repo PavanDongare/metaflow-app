@@ -2,36 +2,17 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { getURL } from '@/lib/utils'
 
 export async function signIn(formData: FormData) {
   const supabase = await createClient()
-  const headerList = await headers()
-  const host = headerList.get('x-forwarded-host') || headerList.get('host')
-  const proto = headerList.get('x-forwarded-proto') || 'https'
-  const referer = headerList.get('referer')
-  
-  const formOrigin = formData.get('origin') as string
-  let origin = formOrigin || (host ? `${proto}://${host}` : '')
-  
-  if (!origin && referer) {
-    try {
-      const refererUrl = new URL(referer)
-      origin = refererUrl.origin
-    } catch (e) {
-      // ignore
-    }
-  }
-
   const email = formData.get('email') as string
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: `${getURL(origin)}/auth/callback`,
-      redirectTo: `${getURL(origin)}/auth/callback`,
+      emailRedirectTo: `${getURL()}auth/callback`,
     },
   })
 
