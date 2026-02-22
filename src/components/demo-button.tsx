@@ -8,13 +8,10 @@ interface DemoButtonProps {
 }
 
 export function DemoButton({ redirectTo = '/', className, children }: DemoButtonProps) {
+  const loginWithRedirect = loginAsDemo.bind(null, redirectTo)
+
   return (
-    <form
-      action={async () => {
-        'use server'
-        await loginAsDemo(redirectTo)
-      }}
-    >
+    <form action={loginWithRedirect}>
       <Button variant="outline" size="sm" type="submit" className={className}>
         {children || 'Try Demo →'}
       </Button>

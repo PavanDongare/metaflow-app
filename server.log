@@ -2,13 +2,9 @@
 > platform@0.1.0 start
 > next start -p 3001
 
-⨯ Failed to start server
-Error: listen EADDRINUSE: address already in use :::3001
-    at <unknown> (Error: listen EADDRINUSE: address already in use :::3001)
-    at new Promise (<anonymous>) {
-  code: 'EADDRINUSE',
-  errno: -48,
-  syscall: 'listen',
-  address: '::',
-  port: 3001
-}
+▲ Next.js 16.1.1
+- Local:         http://localhost:3001
+- Network:       http://192.168.0.39:3001
+
+✓ Starting...
+✓ Ready in 367ms
