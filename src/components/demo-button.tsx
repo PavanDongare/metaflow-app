@@ -7,7 +7,7 @@ interface DemoButtonProps {
   children?: React.ReactNode
 }
 
-export function DemoButton({ redirectTo = '/apps', className, children }: DemoButtonProps) {
+export function DemoButton({ redirectTo = '/', className, children }: DemoButtonProps) {
   return (
     <form
       action={async () => {
