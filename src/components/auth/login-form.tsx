@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2 } from 'lucide-react'
 
 export function LoginForm() {
@@ -37,9 +36,13 @@ export function LoginForm() {
   return (
     <form onSubmit={handleLogin} className="space-y-4">
       {message && (
-        <Alert variant={message.type === 'error' ? 'destructive' : 'default'} className={message.type === 'success' ? 'border-green-500/50 bg-green-500/10 text-green-600 dark:text-green-400' : ''}>
-          <AlertDescription>{message.text}</AlertDescription>
-        </Alert>
+        <div className={`rounded-md p-3 text-sm ${
+          message.type === 'error' 
+            ? 'bg-destructive/10 text-destructive' 
+            : 'bg-green-500/10 text-green-600 dark:text-green-400'
+        }`}>
+          {message.text}
+        </div>
       )}
       
       <div className="space-y-2">
