@@ -16,9 +16,9 @@ import { DemoButton } from '@/components/demo-button'
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>
+  searchParams: Promise<{ error?: string; message?: string }>
 }) {
-  const { error } = await searchParams
+  const { error, message } = await searchParams
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
@@ -46,13 +46,19 @@ export default async function LoginPage({
           <Card className="w-full max-w-md shadow-sm">
             <CardHeader className="text-center">
               <CardTitle className="text-2xl">Sign in</CardTitle>
-              <CardDescription>Welcome back to Metaflow</CardDescription>
+              <CardDescription>Enter your email to receive a magic link</CardDescription>
             </CardHeader>
 
             <CardContent>
               {error && (
                 <div className="mb-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
                   {error}
+                </div>
+              )}
+
+              {message && (
+                <div className="mb-4 rounded-md bg-green-500/10 p-3 text-sm text-green-600 dark:text-green-400">
+                  {message}
                 </div>
               )}
 
@@ -68,13 +74,8 @@ export default async function LoginPage({
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input id="password" name="password" type="password" required />
-                </div>
-
-                <Button formAction={login} className="w-full">
-                  Sign in
+                <Button formAction={signIn} className="w-full">
+                  Send Magic Link
                 </Button>
               </form>
 

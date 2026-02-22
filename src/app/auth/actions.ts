@@ -6,46 +6,23 @@ import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { getURL } from '@/lib/utils'
 
-export async function login(formData: FormData) {
-  const supabase = await createClient()
-
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
-  }
-
-  const { error } = await supabase.auth.signInWithPassword(data)
-
-  if (error) {
-    redirect('/auth/login?error=' + encodeURIComponent(error.message))
-  }
-
-  revalidatePath('/', 'layout')
-  redirect('/')
-}
-
-export async function signup(formData: FormData) {
+export async function signIn(formData: FormData) {
   const supabase = await createClient()
   const origin = (await headers()).get('origin') || ''
+  const email = formData.get('email') as string
 
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
-  }
-
-  const { error } = await supabase.auth.signUp({
-    ...data,
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
     options: {
       emailRedirectTo: `${getURL(origin)}auth/callback`,
     },
   })
 
   if (error) {
-    redirect('/auth/signup?error=' + encodeURIComponent(error.message))
+    redirect('/auth/login?error=' + encodeURIComponent(error.message))
   }
 
-  revalidatePath('/', 'layout')
-  redirect('/auth/signup?message=Check your email to confirm your account')
+  redirect('/auth/login?message=Check your email for the login link')
 }
 
 export async function signout() {

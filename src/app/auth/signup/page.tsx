@@ -46,7 +46,7 @@ export default async function SignupPage({
           <Card className="w-full max-w-md shadow-sm">
             <CardHeader className="text-center">
               <CardTitle className="text-2xl">Create an account</CardTitle>
-              <CardDescription>Get started with Metaflow</CardDescription>
+              <CardDescription>Enter your email to receive a magic link</CardDescription>
             </CardHeader>
 
             <CardContent>
@@ -74,13 +74,8 @@ export default async function SignupPage({
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input id="password" name="password" type="password" minLength={6} required />
-                </div>
-
-                <Button formAction={signup} className="w-full">
-                  Sign up
+                <Button formAction={signIn} className="w-full">
+                  Send Magic Link
                 </Button>
               </form>
 
