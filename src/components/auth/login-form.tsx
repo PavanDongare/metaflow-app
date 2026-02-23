@@ -18,10 +18,15 @@ export function LoginForm() {
     setLoading(true)
     setMessage(null)
 
+    // Get the redirect path from the URL if it exists
+    const params = new URLSearchParams(window.location.search)
+    const next = params.get('redirect') || '/'
+    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`
+
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: redirectTo,
       },
     })
 
