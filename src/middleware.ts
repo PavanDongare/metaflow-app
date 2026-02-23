@@ -7,8 +7,13 @@ export async function middleware(request: NextRequest) {
 
     // Protected paths require authentication
     const isProtected = !request.nextUrl.pathname.startsWith('/auth')
+    
+    // Check if the URL has auth-related parameters (code or token_hash)
+    const hasAuthParams = 
+      request.nextUrl.searchParams.has('code') || 
+      request.nextUrl.searchParams.has('token_hash')
 
-    if (isProtected && !user) {
+    if (isProtected && !user && !hasAuthParams) {
       const url = new URL('/auth/login', request.url)
       url.searchParams.set('redirect', request.nextUrl.pathname)
       return NextResponse.redirect(url)
