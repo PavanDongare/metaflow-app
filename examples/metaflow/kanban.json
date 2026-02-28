@@ -6,14 +6,14 @@
     "slug": "current"
   },
   "app": {
-    "name": "Evidence-Based Project Funding",
-    "description": "A workflow for project funding requiring evidence submission at every transition stage."
+    "name": "Kanban Task Management",
+    "description": "A workflow for managing tasks through a kanban board with required evidence and documentation at each step."
   },
   "objectTypes": [
     {
-      "symbolicId": "$object:project",
-      "displayName": "Funding Project",
-      "processFlag": "ProjectFunding",
+      "symbolicId": "$object:task",
+      "displayName": "Task",
+      "processFlag": "KanbanProcess",
       "config": {
         "titleKey": "title",
         "primaryKey": "id",
@@ -21,12 +21,12 @@
           "title": {
             "type": "string",
             "required": true,
-            "displayName": "Project Title"
+            "displayName": "Task Title"
           },
           "description": {
             "type": "string",
             "required": true,
-            "displayName": "Project Description"
+            "displayName": "Description"
           },
           "status": {
             "type": "string",
@@ -34,31 +34,53 @@
             "displayName": "Status",
             "picklistConfig": {
               "options": [
-                "Draft",
-                "Technical Evaluation",
-                "Financial Audit",
-                "Board Approval",
-                "Funded",
-                "Rejected"
+                "To Do",
+                "In Progress",
+                "In Review",
+                "Done"
               ],
-              "defaultValue": "Draft",
+              "defaultValue": "To Do",
               "allowMultiple": false
             }
           },
-          "technicalEvidence": {
+          "priority": {
             "type": "string",
-            "required": false,
-            "displayName": "Technical Evaluation Evidence"
+            "required": true,
+            "displayName": "Priority",
+            "picklistConfig": {
+              "options": [
+                "Low",
+                "Medium",
+                "High"
+              ],
+              "defaultValue": "Medium",
+              "allowMultiple": false
+            }
           },
-          "financialEvidence": {
-            "type": "string",
+          "estimatedHours": {
+            "type": "number",
             "required": false,
-            "displayName": "Financial Audit Evidence"
+            "displayName": "Estimated Hours"
           },
-          "boardMeetingNotes": {
+          "reviewLink": {
             "type": "string",
             "required": false,
-            "displayName": "Board Meeting Notes"
+            "displayName": "Review Link"
+          },
+          "comments": {
+            "type": "string",
+            "required": false,
+            "displayName": "Comments"
+          },
+          "completionNotes": {
+            "type": "string",
+            "required": false,
+            "displayName": "Completion Notes"
+          },
+          "reopenReason": {
+            "type": "string",
+            "required": false,
+            "displayName": "Reopen Reason"
           },
           "lastUpdated": {
             "type": "timestamp",
@@ -72,103 +94,52 @@
   "relationships": [],
   "actions": [
     {
-      "symbolicId": "$action:submit_for_technical",
-      "displayName": "Submit for Technical Evaluation",
-      "processFlag": "ProjectFunding",
+      "symbolicId": "$action:start_work",
+      "displayName": "Start Work",
+      "processFlag": "KanbanProcess",
       "config": {
         "rules": [
           {
             "type": "modify_object",
             "properties": {
               "status": {
-                "value": "Technical Evaluation",
+                "value": "In Progress",
                 "source": "static"
               },
-              "lastUpdated": {
-                "source": "current_timestamp"
-              }
-            },
-            "objectParameter": "project"
-          }
-        ],
-        "parameters": [
-          {
-            "name": "project",
-            "type": "object-reference",
-            "required": true,
-            "displayName": "Project",
-            "objectTypeId": "$object:project"
-          }
-        ],
-        "description": "Moves the project from Draft to Technical Evaluation.",
-        "executionType": "declarative",
-        "submissionCriteria": [
-          {
-            "left": {
-              "path": {
-                "segments": [],
-                "baseParameterName": "project",
-                "terminalPropertyKey": "status"
-              },
-              "type": "property"
-            },
-            "type": "comparison",
-            "right": {
-              "type": "static",
-              "value": "Draft"
-            },
-            "operator": "="
-          }
-        ]
-      }
-    },
-    {
-      "symbolicId": "$action:complete_technical_evaluation",
-      "displayName": "Complete Technical Evaluation",
-      "processFlag": "ProjectFunding",
-      "config": {
-        "rules": [
-          {
-            "type": "modify_object",
-            "properties": {
-              "status": {
-                "value": "Financial Audit",
-                "source": "static"
-              },
-              "technicalEvidence": {
+              "estimatedHours": {
                 "source": "parameter",
-                "parameterName": "evidence"
+                "parameterName": "hours"
               },
               "lastUpdated": {
                 "source": "current_timestamp"
               }
             },
-            "objectParameter": "project"
+            "objectParameter": "task"
           }
         ],
         "parameters": [
           {
-            "name": "project",
+            "name": "task",
             "type": "object-reference",
             "required": true,
-            "displayName": "Project",
-            "objectTypeId": "$object:project"
+            "displayName": "Task",
+            "objectTypeId": "$object:task"
           },
           {
-            "name": "evidence",
-            "type": "string",
+            "name": "hours",
+            "type": "number",
             "required": true,
-            "displayName": "Technical Evidence / Report Summary"
+            "displayName": "Estimated Hours to Complete"
           }
         ],
-        "description": "Records technical evidence and moves to Financial Audit.",
+        "description": "Moves task to In Progress and records estimated hours.",
         "executionType": "declarative",
         "submissionCriteria": [
           {
             "left": {
               "path": {
                 "segments": [],
-                "baseParameterName": "project",
+                "baseParameterName": "task",
                 "terminalPropertyKey": "status"
               },
               "type": "property"
@@ -176,7 +147,7 @@
             "type": "comparison",
             "right": {
               "type": "static",
-              "value": "Technical Evaluation"
+              "value": "To Do"
             },
             "operator": "="
           }
@@ -184,52 +155,62 @@
       }
     },
     {
-      "symbolicId": "$action:complete_financial_audit",
-      "displayName": "Complete Financial Audit",
-      "processFlag": "ProjectFunding",
+      "symbolicId": "$action:submit_for_review",
+      "displayName": "Submit for Review",
+      "processFlag": "KanbanProcess",
       "config": {
         "rules": [
           {
             "type": "modify_object",
             "properties": {
               "status": {
-                "value": "Board Approval",
+                "value": "In Review",
                 "source": "static"
               },
-              "financialEvidence": {
+              "reviewLink": {
                 "source": "parameter",
-                "parameterName": "evidence"
+                "parameterName": "link"
+              },
+              "comments": {
+                "source": "parameter",
+                "parameterName": "dev_comments"
               },
               "lastUpdated": {
                 "source": "current_timestamp"
               }
             },
-            "objectParameter": "project"
+            "objectParameter": "task"
           }
         ],
         "parameters": [
           {
-            "name": "project",
+            "name": "task",
             "type": "object-reference",
             "required": true,
-            "displayName": "Project",
-            "objectTypeId": "$object:project"
+            "displayName": "Task",
+            "objectTypeId": "$object:task"
           },
           {
-            "name": "evidence",
+            "name": "link",
             "type": "string",
             "required": true,
-            "displayName": "Financial Audit Evidence / Summary"
+            "displayName": "Review URL / Pull Request"
+          },
+          {
+            "name": "dev_comments",
+            "type": "string",
+            "required": false,
+            "displayName": "Developer Comments"
           }
         ],
-        "description": "Records financial evidence and moves to Board Approval.",
+        "description": "Moves task to In Review and provides necessary links.",
         "executionType": "declarative",
         "submissionCriteria": [
           {
             "left": {
               "path": {
                 "segments": [],
-                "baseParameterName": "project",
+                "baseParameterName": "task",
                 "terminalPropertyKey": "status"
               },
               "type": "property"
@@ -237,7 +218,7 @@
             "type": "comparison",
             "right": {
               "type": "static",
-              "value": "Financial Audit"
+              "value": "In Progress"
             },
             "operator": "="
           }
@@ -245,19 +226,19 @@
       }
     },
     {
-      "symbolicId": "$action:final_board_decision",
-      "displayName": "Final Board Decision",
-      "processFlag": "ProjectFunding",
+      "symbolicId": "$action:approve_and_complete",
+      "displayName": "Approve and Complete",
+      "processFlag": "KanbanProcess",
       "config": {
         "rules": [
           {
             "type": "modify_object",
             "properties": {
               "status": {
-                "source": "parameter",
-                "parameterName": "decision"
+                "value": "Done",
+                "source": "static"
               },
-              "boardMeetingNotes": {
+              "completionNotes": {
                 "source": "parameter",
                 "parameterName": "notes"
               },
@@ -265,45 +246,32 @@
                 "source": "current_timestamp"
               }
             },
-            "objectParameter": "project"
+            "objectParameter": "task"
           }
         ],
         "parameters": [
           {
-            "name": "project",
+            "name": "task",
             "type": "object-reference",
             "required": true,
-            "displayName": "Project",
-            "objectTypeId": "$object:project"
-          },
-          {
-            "name": "decision",
-            "type": "string",
-            "required": true,
-            "displayName": "Decision",
-            "picklistConfig": {
-              "options": [
-                "Funded",
-                "Rejected"
-              ],
-              "allowMultiple": false
-            }
+            "displayName": "Task",
+            "objectTypeId": "$object:task"
           },
           {
             "name": "notes",
             "type": "string",
             "required": true,
-            "displayName": "Board Meeting Notes"
+            "displayName": "Closure / Completion Notes"
           }
         ],
-        "description": "Records board decision and notes, finalizing the process.",
+        "description": "Finalizes the task after successful review.",
         "executionType": "declarative",
         "submissionCriteria": [
           {
             "left": {
               "path": {
                 "segments": [],
-                "baseParameterName": "project",
+                "baseParameterName": "task",
                 "terminalPropertyKey": "status"
               },
               "type": "property"
@@ -311,21 +279,79 @@
             "type": "comparison",
             "right": {
               "type": "static",
-              "value": "Board Approval"
+              "value": "In Review"
             },
             "operator": "="
           }
         ]
       }
+    },
+    {
+      "symbolicId": "$action:update_task_details",
+      "displayName": "Update Task Details",
+      "processFlag": "KanbanProcess",
+      "config": {
+        "rules": [
+          {
+            "type": "modify_object",
+            "properties": {
+              "priority": {
+                "source": "parameter",
+                "parameterName": "new_priority"
+              },
+              "description": {
+                "source": "parameter",
+                "parameterName": "new_description"
+              },
+              "lastUpdated": {
+                "source": "current_timestamp"
+              }
+            },
+            "objectParameter": "task"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "task",
+            "type": "object-reference",
+            "required": true,
+            "displayName": "Task",
+            "objectTypeId": "$object:task"
+          },
+          {
+            "name": "new_priority",
+            "type": "string",
+            "required": true,
+            "displayName": "New Priority",
+            "picklistConfig": {
+              "options": [
+                "Low",
+                "Medium",
+                "High"
+              ],
+              "allowMultiple": false
+            }
+          },
+          {
+            "name": "new_description",
+            "type": "string",
+            "required": true,
+            "displayName": "Updated Description"
+          }
+        ],
+        "description": "Updates priority and description without changing state.",
+        "executionType": "declarative",
+        "submissionCriteria": []
+      }
     }
   ],
   "processLayouts": [
     {
-      "symbolicId": "$process:funding_flow",
-      "processName": "Project Funding Lifecycle",
-      "processFlag": "ProjectFunding",
+      "symbolicId": "$process:kanban_flow",
+      "processName": "Standard Kanban Workflow",
+      "processFlag": "KanbanProcess",
       "objectTypeIds": [
-        "$object:project"
+        "$object:task"
       ],
       "trackedPicklists": [
         "status"
