@@ -71,6 +71,7 @@ export interface ProcessLayout {
   id: string;
   tenantId: string;
   processName: string;
+  processFlag?: string;
   objectTypeIds: string[];
   trackedPicklists: string[];
   layoutData: Record<string, unknown>;
@@ -83,6 +84,7 @@ function mapProcessLayout(row: Record<string, unknown>): ProcessLayout {
     id: row.id as string,
     tenantId: row.tenant_id as string,
     processName: row.process_name as string,
+    processFlag: row.process_flag as string,
     objectTypeIds: row.object_type_ids as string[],
     trackedPicklists: (row.tracked_picklists as string[]) || [],
     layoutData: row.layout_data as Record<string, unknown>,
@@ -123,6 +125,7 @@ export async function saveProcessLayout(
   tenantId: string,
   input: {
     processName: string;
+    processFlag?: string;
     objectTypeIds: string[];
     trackedPicklists?: string[];
     layoutData: Record<string, unknown>;
@@ -136,6 +139,7 @@ export async function saveProcessLayout(
       {
         tenant_id: tenantId,
         process_name: input.processName,
+        process_flag: input.processFlag,
         object_type_ids: input.objectTypeIds,
         tracked_picklists: input.trackedPicklists || [],
         layout_data: input.layoutData,

@@ -1,12 +1,25 @@
 'use client';
 
+import { useMemo } from 'react';
 import Link from 'next/link';
 import { Database, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useObjectTypes } from '../lib/hooks';
+import { useTenant } from '@/lib/auth/tenant-context';
 
 export default function WorkspacePage() {
+  const { processFilter } = useTenant();
   const { objectTypes, loading, error } = useObjectTypes();
+
+  // Filter out junction object types and apply process filter
+  const regularTypes = useMemo(() => {
+    let types = objectTypes.filter(t => !t.config.isJunction);
+    if (processFilter !== 'all') {
+      types = types.filter(t => t.processFlag === processFilter);
+    }
+    return types;
+  }, [objectTypes, processFilter]);
 
   if (loading) {
     return (
@@ -24,25 +37,33 @@ export default function WorkspacePage() {
     );
   }
 
-  // Filter out junction object types
-  const regularTypes = objectTypes.filter(t => !t.config.isJunction);
-
   return (
     <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Workspace</h1>
-        <p className="text-muted-foreground">
-          Manage your data instances
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Workspace</h1>
+          <p className="text-muted-foreground">
+            Manage your data instances
+          </p>
+        </div>
+        {processFilter !== 'all' && (
+          <Badge variant="outline" className="px-3 py-1 h-auto text-sm font-bold border-primary/30 text-primary uppercase">
+            {processFilter}
+          </Badge>
+        )}
       </div>
 
       {regularTypes.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Database className="w-12 h-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No Object Types</h3>
+            <h3 className="text-lg font-medium mb-2">
+              {processFilter === 'all' ? 'No Object Types' : `No Object Types in ${processFilter}`}
+            </h3>
             <p className="text-muted-foreground text-center">
-              Create object types in the Ontology section first
+              {processFilter === 'all' 
+                ? 'Create object types in the Ontology section first'
+                : `No object types are currently flagged as ${processFilter}`}
             </p>
           </CardContent>
         </Card>
@@ -65,7 +86,14 @@ export default function WorkspacePage() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="font-medium">{type.displayName}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium">{type.displayName}</p>
+                        {type.processFlag && processFilter === 'all' && (
+                          <Badge variant="secondary" className="text-[10px] h-4 px-1.5 uppercase">
+                            {type.processFlag}
+                          </Badge>
+                        )}
+                      </div>
                       <p className="text-xs text-muted-foreground mt-1">
                         {props.length} properties
                         {type.config.titleKey ? `, title: ${type.config.titleKey}` : ''}

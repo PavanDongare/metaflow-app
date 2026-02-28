@@ -15,11 +15,27 @@ interface Props {
 }
 
 export function ObjectForm({ objectType, onSave, onCancel }: Props) {
-  const [formData, setFormData] = useState<Record<string, any>>({});
+  const properties = objectType.config.properties;
+  const [formData, setFormData] = useState<Record<string, any>>(() => {
+    const initialData: Record<string, any> = {};
+    Object.entries(properties).forEach(([key, prop]) => {
+      if (prop.type === 'string' && prop.picklistConfig) {
+        if (prop.picklistConfig.allowMultiple) {
+          initialData[key] = prop.picklistConfig.defaultValue || [];
+        } else if (prop.picklistConfig.defaultValue !== undefined) {
+          initialData[key] = prop.picklistConfig.defaultValue;
+        } else if (prop.required && prop.picklistConfig.options.length > 0) {
+          // If required but no default, use the first option as it will be selected by the browser
+          initialData[key] = prop.picklistConfig.options[0];
+        }
+      } else if (prop.type === 'boolean') {
+        initialData[key] = false;
+      }
+    });
+    return initialData;
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
-
-  const properties = objectType.config.properties;
 
   const handleSubmit = async () => {
     // Client-side validation
@@ -80,7 +96,7 @@ export function ObjectForm({ objectType, onSave, onCancel }: Props) {
                     // Multi-select
                     <select
                       multiple
-                      value={formData[key] || prop.picklistConfig.defaultValue || []}
+                      value={formData[key] || []}
                       onChange={(e) => {
                         const selected = Array.from(e.target.selectedOptions, option => option.value);
                         setFormData({ ...formData, [key]: selected });
@@ -96,12 +112,12 @@ export function ObjectForm({ objectType, onSave, onCancel }: Props) {
                   ) : (
                     // Single-select
                     <select
-                      value={formData[key] || prop.picklistConfig.defaultValue || ''}
+                      value={formData[key] || ''}
                       onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
                       className="w-full border rounded px-3 py-2 text-sm bg-background"
                       required={prop.required}
                     >
-                      <option value="">Select {prop.displayName}...</option>
+                      {!prop.required && <option value="">Select {prop.displayName}...</option>}
                       {prop.picklistConfig.options.map(option => (
                         <option key={option} value={option}>{option}</option>
                       ))}

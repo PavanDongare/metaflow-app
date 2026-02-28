@@ -9,6 +9,7 @@ function mapRelationship(row: Record<string, unknown>): Relationship {
     id: row.id as string,
     tenantId: row.tenant_id as string,
     displayName: row.display_name as string,
+    processFlag: row.process_flag as string,
     cardinality: row.cardinality as RelationshipCardinality,
     sourceObjectTypeId: row.source_object_type_id as string,
     targetObjectTypeId: row.target_object_type_id as string,
@@ -75,6 +76,7 @@ export async function createRelationship(
   tenantId: string,
   input: {
     displayName: string;
+    processFlag?: string;
     cardinality: RelationshipCardinality;
     sourceObjectTypeId: string;
     targetObjectTypeId: string;
@@ -93,6 +95,7 @@ export async function createRelationship(
     .insert({
       tenant_id: tenantId,
       display_name: input.displayName,
+      process_flag: input.processFlag,
       cardinality: input.cardinality,
       source_object_type_id: input.sourceObjectTypeId,
       target_object_type_id: input.targetObjectTypeId,
@@ -117,6 +120,7 @@ export async function updateRelationship(
   tenantId: string,
   updates: {
     displayName?: string;
+    processFlag?: string;
     sourceDisplayName?: string;
     targetDisplayName?: string;
     config?: Record<string, unknown>;
@@ -127,6 +131,7 @@ export async function updateRelationship(
   };
 
   if (updates.displayName) updateData.display_name = updates.displayName;
+  if (updates.processFlag !== undefined) updateData.process_flag = updates.processFlag;
   if (updates.sourceDisplayName) updateData.source_display_name = updates.sourceDisplayName;
   if (updates.targetDisplayName) updateData.target_display_name = updates.targetDisplayName;
   if (updates.config) updateData.config = updates.config;

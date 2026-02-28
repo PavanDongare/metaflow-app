@@ -107,11 +107,13 @@ lines.push('');
 for (const o of objectTypes) {
   const id = idMap.get(o.symbolicId);
   const resolvedConfig = replaceSymbolsDeep(o.config || {});
+  const processFlag = o.processFlag ? sqlText(o.processFlag) : 'NULL';
 
-  lines.push('INSERT INTO metaflow.object_types (id, tenant_id, display_name, config)');
-  lines.push(`VALUES (${sqlText(id)}::uuid, ${sqlText(tenantId)}::uuid, ${sqlText(o.displayName)}, ${sqlJson(resolvedConfig)})`);
+  lines.push('INSERT INTO metaflow.object_types (id, tenant_id, display_name, process_flag, config)');
+  lines.push(`VALUES (${sqlText(id)}::uuid, ${sqlText(tenantId)}::uuid, ${sqlText(o.displayName)}, ${processFlag}, ${sqlJson(resolvedConfig)})`);
   lines.push('ON CONFLICT (id) DO UPDATE SET');
   lines.push('  display_name = EXCLUDED.display_name,');
+  lines.push('  process_flag = EXCLUDED.process_flag,');
   lines.push('  config = EXCLUDED.config,');
   lines.push('  updated_at = now();');
   lines.push('');
@@ -120,6 +122,7 @@ for (const o of objectTypes) {
 for (const r of relationships) {
   const id = idMap.get(r.symbolicId);
   const resolvedConfig = replaceSymbolsDeep(r.config || {});
+  const processFlag = r.processFlag ? sqlText(r.processFlag) : 'NULL';
 
   const sourceObjectTypeId = replaceSymbolsDeep(r.sourceObjectTypeId);
   const targetObjectTypeId = replaceSymbolsDeep(r.targetObjectTypeId);
@@ -129,17 +132,18 @@ for (const r of relationships) {
   const propertyName = r.propertyName ? sqlText(r.propertyName) : 'NULL';
 
   lines.push('INSERT INTO metaflow.relationships (');
-  lines.push('  id, tenant_id, display_name, cardinality,');
+  lines.push('  id, tenant_id, display_name, process_flag, cardinality,');
   lines.push('  source_object_type_id, target_object_type_id,');
   lines.push('  source_display_name, target_display_name,');
   lines.push('  junction_object_type_id, source_fk_property_name, target_fk_property_name, property_name, config');
   lines.push(') VALUES (');
-  lines.push(`  ${sqlText(id)}::uuid, ${sqlText(tenantId)}::uuid, ${sqlText(r.displayName)}, ${sqlText(r.cardinality)},`);
+  lines.push(`  ${sqlText(id)}::uuid, ${sqlText(tenantId)}::uuid, ${sqlText(r.displayName)}, ${processFlag}, ${sqlText(r.cardinality)},`);
   lines.push(`  ${sqlText(sourceObjectTypeId)}::uuid, ${sqlText(targetObjectTypeId)}::uuid,`);
   lines.push(`  ${sqlText(r.sourceDisplayName)}, ${sqlText(r.targetDisplayName)},`);
   lines.push(`  ${junctionObjectTypeId}, ${sourceFkPropertyName}, ${targetFkPropertyName}, ${propertyName}, ${sqlJson(resolvedConfig)}`);
   lines.push(') ON CONFLICT (id) DO UPDATE SET');
   lines.push('  display_name = EXCLUDED.display_name,');
+  lines.push('  process_flag = EXCLUDED.process_flag,');
   lines.push('  cardinality = EXCLUDED.cardinality,');
   lines.push('  source_object_type_id = EXCLUDED.source_object_type_id,');
   lines.push('  target_object_type_id = EXCLUDED.target_object_type_id,');
@@ -157,11 +161,13 @@ for (const r of relationships) {
 for (const a of actions) {
   const id = idMap.get(a.symbolicId);
   const resolvedConfig = replaceSymbolsDeep(a.config || {});
+  const processFlag = a.processFlag ? sqlText(a.processFlag) : 'NULL';
 
-  lines.push('INSERT INTO metaflow.action_types (id, tenant_id, display_name, config)');
-  lines.push(`VALUES (${sqlText(id)}::uuid, ${sqlText(tenantId)}::uuid, ${sqlText(a.displayName)}, ${sqlJson(resolvedConfig)})`);
+  lines.push('INSERT INTO metaflow.action_types (id, tenant_id, display_name, process_flag, config)');
+  lines.push(`VALUES (${sqlText(id)}::uuid, ${sqlText(tenantId)}::uuid, ${sqlText(a.displayName)}, ${processFlag}, ${sqlJson(resolvedConfig)})`);
   lines.push('ON CONFLICT (id) DO UPDATE SET');
   lines.push('  display_name = EXCLUDED.display_name,');
+  lines.push('  process_flag = EXCLUDED.process_flag,');
   lines.push('  config = EXCLUDED.config,');
   lines.push('  updated_at = now();');
   lines.push('');
@@ -171,13 +177,15 @@ for (const p of processLayouts) {
   const key = p.symbolicId || `$process:${p.processName}`;
   const id = idMap.get(key);
   const objectTypeIds = replaceSymbolsDeep(p.objectTypeIds || []);
+  const processFlag = p.processFlag ? sqlText(p.processFlag) : 'NULL';
 
-  lines.push('INSERT INTO metaflow.process_layouts (id, tenant_id, process_name, object_type_ids, tracked_picklists, layout_data)');
+  lines.push('INSERT INTO metaflow.process_layouts (id, tenant_id, process_name, process_flag, object_type_ids, tracked_picklists, layout_data)');
   lines.push(`VALUES (`);
-  lines.push(`  ${sqlText(id)}::uuid, ${sqlText(tenantId)}::uuid, ${sqlText(p.processName)},`);
+  lines.push(`  ${sqlText(id)}::uuid, ${sqlText(tenantId)}::uuid, ${sqlText(p.processName)}, ${processFlag},`);
   lines.push(`  ${sqlUuidArray(objectTypeIds)}, ${sqlTextArray(p.trackedPicklists || [])}, ${sqlJson(p.layoutData || {})}`);
   lines.push(') ON CONFLICT (tenant_id, process_name) DO UPDATE SET');
   lines.push('  object_type_ids = EXCLUDED.object_type_ids,');
+  lines.push('  process_flag = EXCLUDED.process_flag,');
   lines.push('  tracked_picklists = EXCLUDED.tracked_picklists,');
   lines.push('  layout_data = EXCLUDED.layout_data,');
   lines.push('  updated_at = now();');

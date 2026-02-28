@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS metaflow.object_types (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL REFERENCES metaflow.tenants(id) ON DELETE CASCADE,
   display_name TEXT NOT NULL,
+  process_flag TEXT,
   config JSONB NOT NULL DEFAULT '{}'::jsonb,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now(),
@@ -66,6 +67,7 @@ CREATE TABLE IF NOT EXISTS metaflow.relationships (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL REFERENCES metaflow.tenants(id) ON DELETE CASCADE,
   display_name TEXT NOT NULL,
+  process_flag TEXT,
   cardinality TEXT NOT NULL CHECK (cardinality IN ('ONE_TO_MANY', 'MANY_TO_ONE', 'MANY_TO_MANY')),
   source_object_type_id UUID NOT NULL REFERENCES metaflow.object_types(id) ON DELETE CASCADE,
   target_object_type_id UUID NOT NULL REFERENCES metaflow.object_types(id) ON DELETE CASCADE,
@@ -87,6 +89,7 @@ CREATE TABLE IF NOT EXISTS metaflow.relationships (
 CREATE INDEX IF NOT EXISTS idx_mf_relationships_tenant ON metaflow.relationships(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_mf_relationships_source ON metaflow.relationships(source_object_type_id);
 CREATE INDEX IF NOT EXISTS idx_mf_relationships_target ON metaflow.relationships(target_object_type_id);
+CREATE INDEX IF NOT EXISTS idx_mf_relationships_process_flag ON metaflow.relationships(process_flag);
 
 COMMENT ON TABLE metaflow.relationships IS 'Relationship definitions between object types (1:N, N:1, M:N)';
 
@@ -97,6 +100,7 @@ CREATE TABLE IF NOT EXISTS metaflow.action_types (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL REFERENCES metaflow.tenants(id) ON DELETE CASCADE,
   display_name TEXT NOT NULL,
+  process_flag TEXT,
   config JSONB NOT NULL,
   created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT now() NOT NULL,
@@ -104,6 +108,7 @@ CREATE TABLE IF NOT EXISTS metaflow.action_types (
 );
 
 CREATE INDEX IF NOT EXISTS idx_mf_action_types_tenant ON metaflow.action_types(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_mf_action_types_process_flag ON metaflow.action_types(process_flag);
 
 COMMENT ON TABLE metaflow.action_types IS 'AI-generated action definitions with declarative config';
 COMMENT ON COLUMN metaflow.action_types.config IS '{
@@ -159,6 +164,7 @@ CREATE TABLE IF NOT EXISTS metaflow.process_layouts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL REFERENCES metaflow.tenants(id) ON DELETE CASCADE,
   process_name TEXT NOT NULL,
+  process_flag TEXT,
   object_type_ids UUID[] NOT NULL,
   tracked_picklists TEXT[] DEFAULT '{}',
   layout_data JSONB NOT NULL DEFAULT '{}'::jsonb,
@@ -168,6 +174,8 @@ CREATE TABLE IF NOT EXISTS metaflow.process_layouts (
 );
 
 CREATE INDEX IF NOT EXISTS idx_mf_process_layouts_tenant ON metaflow.process_layouts(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_mf_process_layouts_process_flag ON metaflow.process_layouts(process_flag);
+
 
 COMMENT ON TABLE metaflow.process_layouts IS 'Visual layout for process/workflow canvases';
 

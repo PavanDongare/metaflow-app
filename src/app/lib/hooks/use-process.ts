@@ -116,11 +116,13 @@ export function useProcessLayouts() {
   const createLayout = useCallback(async (
     processName: string,
     objectTypeIds: string[],
-    trackedPicklists: string[] = []
+    trackedPicklists: string[] = [],
+    processFlag?: string
   ) => {
     const { saveProcessLayout } = await import('../queries/layouts');
     const layout = await saveProcessLayout(tenantId, {
       processName,
+      processFlag,
       objectTypeIds,
       trackedPicklists,
       layoutData: {},

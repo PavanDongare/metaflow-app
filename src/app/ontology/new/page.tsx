@@ -40,7 +40,8 @@ export default function NewObjectTypePage() {
 
     try {
       await createObjectType(tenantId, {
-        displayName: formData.displayName,
+        displayName: formData.displayName!,
+        processFlag: formData.processFlag,
         config: formData.config!,
       });
       router.push('/ontology');

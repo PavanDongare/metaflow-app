@@ -9,6 +9,7 @@ function mapObjectType(row: Record<string, unknown>): ObjectType {
     id: row.id as string,
     tenantId: row.tenant_id as string,
     displayName: row.display_name as string,
+    processFlag: row.process_flag as string,
     config: row.config as ObjectTypeConfig,
     createdAt: new Date(row.created_at as string),
     updatedAt: new Date(row.updated_at as string),
@@ -50,6 +51,7 @@ export async function createObjectType(
   tenantId: string,
   input: {
     displayName: string;
+    processFlag?: string;
     config: ObjectTypeConfig;
   }
 ): Promise<ObjectType> {
@@ -71,6 +73,7 @@ export async function createObjectType(
     .insert({
       tenant_id: tenantId,
       display_name: input.displayName,
+      process_flag: input.processFlag,
       config: input.config,
     })
     .select()
@@ -84,7 +87,7 @@ export async function createObjectType(
 export async function updateObjectType(
   id: string,
   tenantId: string,
-  updates: { displayName?: string; config?: ObjectTypeConfig }
+  updates: { displayName?: string; processFlag?: string; config?: ObjectTypeConfig }
 ): Promise<ObjectType> {
   const updateData: Record<string, unknown> = {
     updated_at: new Date().toISOString(),
@@ -92,6 +95,10 @@ export async function updateObjectType(
 
   if (updates.displayName) {
     updateData.display_name = updates.displayName;
+  }
+
+  if (updates.processFlag !== undefined) {
+    updateData.process_flag = updates.processFlag;
   }
 
   if (updates.config) {

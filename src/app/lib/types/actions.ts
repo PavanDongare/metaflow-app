@@ -184,6 +184,7 @@ export interface ActionType {
   id: string;
   tenantId: string;
   displayName: string;
+  processFlag?: string;
   config: ActionTypeConfig;
   createdAt: Date;
   updatedAt: Date;
@@ -214,6 +215,7 @@ export interface ExecuteActionResponse {
 export interface ActionListItem {
   id: string;
   displayName: string;
+  processFlag?: string;
   executionType: ActionExecutionType;
   parameters: ActionParameter[];
   description?: string;

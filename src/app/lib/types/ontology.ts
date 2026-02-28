@@ -4,6 +4,7 @@ export interface ObjectType {
   id: string;
   tenantId: string;
   displayName: string;
+  processFlag?: string;
   config: ObjectTypeConfig;
   createdAt: Date;
   updatedAt: Date;
@@ -81,6 +82,7 @@ export interface Relationship {
   id: string;
   tenantId: string;
   displayName: string;
+  processFlag?: string;
   cardinality: RelationshipCardinality;
   sourceObjectTypeId: string;
   targetObjectTypeId: string;
@@ -99,11 +101,13 @@ export interface Relationship {
 export interface CreateObjectTypeInput {
   tenantId: string;
   displayName: string;
+  processFlag?: string;
   config: ObjectTypeConfig;
 }
 
 export interface UpdateObjectTypeInput {
   displayName?: string;
+  processFlag?: string;
   config?: ObjectTypeConfig;
 }
 
@@ -120,6 +124,7 @@ export interface UpdateObjectInput {
 export interface CreateRelationshipInput {
   tenantId: string;
   displayName: string;
+  processFlag?: string;
   cardinality: RelationshipCardinality;
   sourceObjectTypeId: string;
   targetObjectTypeId: string;
@@ -133,6 +138,7 @@ export interface CreateRelationshipInput {
 
 export interface UpdateRelationshipInput {
   displayName?: string;
+  processFlag?: string;
   sourceDisplayName?: string;
   targetDisplayName?: string;
   config?: Record<string, unknown>;

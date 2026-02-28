@@ -1,0 +1,636 @@
+{
+  "version": 1,
+  "tenant": {
+    "id": "00000000-0000-0000-0000-000000000001",
+    "name": "Pharma Compliance Tenant",
+    "slug": "pharma-compliance"
+  },
+  "app": {
+    "name": "CAPA Management System",
+    "description": "Corrective and Preventive Action process for pharmaceutical quality assurance and compliance."
+  },
+  "objectTypes": [
+    {
+      "symbolicId": "$capa",
+      "displayName": "CAPA",
+      "processFlag": "Quality",
+      "config": {
+        "titleKey": "title",
+        "primaryKey": "id",
+        "properties": {
+          "title": {
+            "type": "string",
+            "required": true,
+            "displayName": "Title"
+          },
+          "description": {
+            "type": "string",
+            "required": true,
+            "displayName": "Description"
+          },
+          "status": {
+            "type": "string",
+            "required": true,
+            "displayName": "Status",
+            "picklistConfig": {
+              "options": [
+                "Draft",
+                "Investigation",
+                "Plan Development",
+                "Implementation",
+                "Effectiveness Check",
+                "Closed"
+              ],
+              "defaultValue": "Draft",
+              "allowMultiple": false
+            }
+          },
+          "severity": {
+            "type": "string",
+            "required": true,
+            "displayName": "Severity",
+            "picklistConfig": {
+              "options": [
+                "Critical",
+                "Major",
+                "Minor"
+              ],
+              "defaultValue": "Major",
+              "allowMultiple": false
+            }
+          },
+          "priority": {
+            "type": "string",
+            "required": false,
+            "displayName": "Priority",
+            "picklistConfig": {
+              "options": [
+                "Low",
+                "Medium",
+                "High"
+              ],
+              "defaultValue": "Medium",
+              "allowMultiple": false
+            }
+          },
+          "source": {
+            "type": "string",
+            "required": true,
+            "displayName": "Source",
+            "picklistConfig": {
+              "options": [
+                "Internal Audit",
+                "External Audit",
+                "Customer Complaint",
+                "Deviation",
+                "Management Review"
+              ],
+              "allowMultiple": false
+            }
+          },
+          "rootCause": {
+            "type": "string",
+            "required": false,
+            "displayName": "Root Cause"
+          },
+          "initialAssessment": {
+            "type": "string",
+            "required": false,
+            "displayName": "Initial Assessment"
+          },
+          "investigationSummary": {
+            "type": "string",
+            "required": false,
+            "displayName": "Investigation Summary"
+          },
+          "planApprovalNotes": {
+            "type": "string",
+            "required": false,
+            "displayName": "Plan Approval Notes"
+          },
+          "implementationSummary": {
+            "type": "string",
+            "required": false,
+            "displayName": "Implementation Summary"
+          },
+          "verificationNotes": {
+            "type": "string",
+            "required": false,
+            "displayName": "Verification Notes"
+          },
+          "lastActivityAt": {
+            "type": "timestamp",
+            "required": false,
+            "displayName": "Last Activity At"
+          }
+        }
+      }
+    },
+    {
+      "symbolicId": "$action_item",
+      "displayName": "Action Item",
+      "processFlag": "Quality",
+      "config": {
+        "titleKey": "task",
+        "primaryKey": "id",
+        "properties": {
+          "task": {
+            "type": "string",
+            "required": true,
+            "displayName": "Task"
+          },
+          "assignedTo": {
+            "type": "string",
+            "required": true,
+            "displayName": "Assigned To"
+          },
+          "dueDate": {
+            "type": "timestamp",
+            "required": true,
+            "displayName": "Due Date"
+          },
+          "isCompleted": {
+            "type": "boolean",
+            "required": true,
+            "displayName": "Completed"
+          },
+          "capaId": {
+            "type": "object-reference",
+            "required": true,
+            "displayName": "CAPA",
+            "referenceConfig": {
+              "targetObjectTypeId": "$capa"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "symbolicId": "$capa_has_action_items",
+      "displayName": "CAPA has Action Items",
+      "processFlag": "Quality",
+      "cardinality": "ONE_TO_MANY",
+      "sourceObjectTypeId": "$capa",
+      "targetObjectTypeId": "$action_item",
+      "sourceDisplayName": "CAPA",
+      "targetDisplayName": "Action Items",
+      "propertyName": "capaId",
+      "config": {
+        "notes": "Tasks associated with the CAPA implementation"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "symbolicId": "$start_investigation",
+      "displayName": "Start Investigation",
+      "processFlag": "Quality",
+      "config": {
+        "rules": [
+          {
+            "type": "modify_object",
+            "properties": {
+              "status": {
+                "value": "Investigation",
+                "source": "static"
+              },
+              "initialAssessment": {
+                "source": "parameter",
+                "parameterName": "assessment"
+              },
+              "priority": {
+                "source": "parameter",
+                "parameterName": "priority"
+              },
+              "lastActivityAt": {
+                "source": "current_timestamp"
+              }
+            },
+            "objectParameter": "capa"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "capa",
+            "type": "object-reference",
+            "required": true,
+            "displayName": "CAPA",
+            "objectTypeId": "$capa"
+          },
+          {
+            "name": "assessment",
+            "type": "string",
+            "required": true,
+            "displayName": "Initial Assessment"
+          },
+          {
+            "name": "priority",
+            "type": "string",
+            "required": true,
+            "displayName": "Priority",
+            "picklistConfig": {
+              "options": [
+                "Low",
+                "Medium",
+                "High"
+              ],
+              "allowMultiple": false
+            }
+          }
+        ],
+        "description": "Moves CAPA to Investigation stage with initial assessment and priority",
+        "executionType": "declarative",
+        "submissionCriteria": [
+          {
+            "left": {
+              "path": {
+                "segments": [],
+                "baseParameterName": "capa",
+                "terminalPropertyKey": "status"
+              },
+              "type": "property"
+            },
+            "type": "comparison",
+            "right": {
+              "type": "static",
+              "value": "Draft"
+            },
+            "operator": "="
+          }
+        ]
+      }
+    },
+    {
+      "symbolicId": "$complete_investigation",
+      "displayName": "Complete Investigation",
+      "processFlag": "Quality",
+      "config": {
+        "rules": [
+          {
+            "type": "modify_object",
+            "properties": {
+              "status": {
+                "value": "Plan Development",
+                "source": "static"
+              },
+              "rootCause": {
+                "source": "parameter",
+                "parameterName": "rootCause"
+              },
+              "investigationSummary": {
+                "source": "parameter",
+                "parameterName": "summary"
+              },
+              "lastActivityAt": {
+                "source": "current_timestamp"
+              }
+            },
+            "objectParameter": "capa"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "capa",
+            "type": "object-reference",
+            "required": true,
+            "displayName": "CAPA",
+            "objectTypeId": "$capa"
+          },
+          {
+            "name": "rootCause",
+            "type": "string",
+            "required": true,
+            "displayName": "Root Cause Analysis"
+          },
+          {
+            "name": "summary",
+            "type": "string",
+            "required": true,
+            "displayName": "Investigation Summary"
+          }
+        ],
+        "description": "Records root cause and moves to Plan Development",
+        "executionType": "declarative",
+        "submissionCriteria": [
+          {
+            "left": {
+              "path": {
+                "segments": [],
+                "baseParameterName": "capa",
+                "terminalPropertyKey": "status"
+              },
+              "type": "property"
+            },
+            "type": "comparison",
+            "right": {
+              "type": "static",
+              "value": "Investigation"
+            },
+            "operator": "="
+          }
+        ]
+      }
+    },
+    {
+      "symbolicId": "$approve_action_plan",
+      "displayName": "Approve Action Plan",
+      "processFlag": "Quality",
+      "config": {
+        "rules": [
+          {
+            "type": "modify_object",
+            "properties": {
+              "status": {
+                "value": "Implementation",
+                "source": "static"
+              },
+              "planApprovalNotes": {
+                "source": "parameter",
+                "parameterName": "approvalNotes"
+              },
+              "lastActivityAt": {
+                "source": "current_timestamp"
+              }
+            },
+            "objectParameter": "capa"
+          },
+          {
+            "type": "create_object",
+            "properties": {
+              "task": {
+                "value": "Initial Implementation Task",
+                "source": "static"
+              },
+              "assignedTo": {
+                "value": "Implementation Team",
+                "source": "static"
+              },
+              "dueDate": {
+                "source": "current_timestamp"
+              },
+              "isCompleted": {
+                "value": false,
+                "source": "static"
+              },
+              "capaId": {
+                "source": "parameter",
+                "parameterName": "capa"
+              }
+            },
+            "objectTypeId": "$action_item"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "capa",
+            "type": "object-reference",
+            "required": true,
+            "displayName": "CAPA",
+            "objectTypeId": "$capa"
+          },
+          {
+            "name": "approvalNotes",
+            "type": "string",
+            "required": true,
+            "displayName": "Approval Notes"
+          }
+        ],
+        "description": "Approves the plan, moves to Implementation, and creates an initial action item",
+        "executionType": "declarative",
+        "submissionCriteria": [
+          {
+            "left": {
+              "path": {
+                "segments": [],
+                "baseParameterName": "capa",
+                "terminalPropertyKey": "status"
+              },
+              "type": "property"
+            },
+            "type": "comparison",
+            "right": {
+              "type": "static",
+              "value": "Plan Development"
+            },
+            "operator": "="
+          }
+        ]
+      }
+    },
+    {
+      "symbolicId": "$add_action_item",
+      "displayName": "Add Action Item",
+      "processFlag": "Quality",
+      "config": {
+        "rules": [
+          {
+            "type": "create_object",
+            "properties": {
+              "task": {
+                "source": "parameter",
+                "parameterName": "task"
+              },
+              "assignedTo": {
+                "source": "parameter",
+                "parameterName": "assignedTo"
+              },
+              "dueDate": {
+                "source": "parameter",
+                "parameterName": "dueDate"
+              },
+              "isCompleted": {
+                "value": false,
+                "source": "static"
+              },
+              "capaId": {
+                "source": "parameter",
+                "parameterName": "capa"
+              }
+            },
+            "objectTypeId": "$action_item"
+          },
+          {
+            "type": "modify_object",
+            "properties": {
+              "lastActivityAt": {
+                "source": "current_timestamp"
+              }
+            },
+            "objectParameter": "capa"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "capa",
+            "type": "object-reference",
+            "required": true,
+            "displayName": "CAPA",
+            "objectTypeId": "$capa"
+          },
+          {
+            "name": "task",
+            "type": "string",
+            "required": true,
+            "displayName": "Task"
+          },
+          {
+            "name": "assignedTo",
+            "type": "string",
+            "required": true,
+            "displayName": "Assigned To"
+          },
+          {
+            "name": "dueDate",
+            "type": "timestamp",
+            "required": true,
+            "displayName": "Due Date"
+          }
+        ],
+        "description": "Adds a new action item to the CAPA and updates activity timestamp. No submission criteria allow adding tasks at any stage.",
+        "executionType": "declarative"
+      }
+    },
+    {
+      "symbolicId": "$submit_for_verification",
+      "displayName": "Submit for Verification",
+      "processFlag": "Quality",
+      "config": {
+        "rules": [
+          {
+            "type": "modify_object",
+            "properties": {
+              "status": {
+                "value": "Effectiveness Check",
+                "source": "static"
+              },
+              "implementationSummary": {
+                "source": "parameter",
+                "parameterName": "summary"
+              },
+              "lastActivityAt": {
+                "source": "current_timestamp"
+              }
+            },
+            "objectParameter": "capa"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "capa",
+            "type": "object-reference",
+            "required": true,
+            "displayName": "CAPA",
+            "objectTypeId": "$capa"
+          },
+          {
+            "name": "summary",
+            "type": "string",
+            "required": true,
+            "displayName": "Implementation Summary"
+          }
+        ],
+        "description": "Moves to Effectiveness Check after implementation is complete",
+        "executionType": "declarative",
+        "submissionCriteria": [
+          {
+            "left": {
+              "path": {
+                "segments": [],
+                "baseParameterName": "capa",
+                "terminalPropertyKey": "status"
+              },
+              "type": "property"
+            },
+            "type": "comparison",
+            "right": {
+              "type": "static",
+              "value": "Implementation"
+            },
+            "operator": "="
+          }
+        ]
+      }
+    },
+    {
+      "symbolicId": "$close_capa",
+      "displayName": "Close CAPA",
+      "processFlag": "Quality",
+      "config": {
+        "rules": [
+          {
+            "type": "modify_object",
+            "properties": {
+              "status": {
+                "value": "Closed",
+                "source": "static"
+              },
+              "verificationNotes": {
+                "source": "parameter",
+                "parameterName": "notes"
+              },
+              "lastActivityAt": {
+                "source": "current_timestamp"
+              }
+            },
+            "objectParameter": "capa"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "capa",
+            "type": "object-reference",
+            "required": true,
+            "displayName": "CAPA",
+            "objectTypeId": "$capa"
+          },
+          {
+            "name": "notes",
+            "type": "string",
+            "required": true,
+            "displayName": "Verification Notes"
+          }
+        ],
+        "description": "Finalizes the CAPA as closed and effective",
+        "executionType": "declarative",
+        "submissionCriteria": [
+          {
+            "left": {
+              "path": {
+                "segments": [],
+                "baseParameterName": "capa",
+                "terminalPropertyKey": "status"
+              },
+              "type": "property"
+            },
+            "type": "comparison",
+            "right": {
+              "type": "static",
+              "value": "Effectiveness Check"
+            },
+            "operator": "="
+          }
+        ]
+      }
+    }
+  ],
+  "processLayouts": [
+    {
+      "symbolicId": "$process_capa",
+      "processName": "CAPA Process",
+      "processFlag": "Quality",
+      "objectTypeIds": [
+        "$capa"
+      ],
+      "trackedPicklists": [
+        "status"
+      ],
+      "layoutData": {
+        "edges": [],
+        "nodes": [],
+        "version": 1
+      }
+    }
+  ]
+}

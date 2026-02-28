@@ -77,6 +77,7 @@ async function main() {
     id: idMap.get(o.symbolicId),
     tenant_id: tenant.id,
     display_name: o.displayName,
+    process_flag: o.processFlag || null,
     config: replaceSymbolsDeep(o.config || {}),
   }));
 
@@ -89,6 +90,7 @@ async function main() {
     id: idMap.get(r.symbolicId),
     tenant_id: tenant.id,
     display_name: r.displayName,
+    process_flag: r.processFlag || null,
     cardinality: r.cardinality,
     source_object_type_id: replaceSymbolsDeep(r.sourceObjectTypeId),
     target_object_type_id: replaceSymbolsDeep(r.targetObjectTypeId),
@@ -110,6 +112,7 @@ async function main() {
     id: idMap.get(a.symbolicId),
     tenant_id: tenant.id,
     display_name: a.displayName,
+    process_flag: a.processFlag || null,
     config: replaceSymbolsDeep(a.config || {}),
   }));
 
@@ -124,6 +127,7 @@ async function main() {
       id: idMap.get(key),
       tenant_id: tenant.id,
       process_name: p.processName,
+      process_flag: p.processFlag || null,
       object_type_ids: replaceSymbolsDeep(p.objectTypeIds || []),
       tracked_picklists: p.trackedPicklists || [],
       layout_data: replaceSymbolsDeep(p.layoutData || {}),

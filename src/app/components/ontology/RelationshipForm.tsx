@@ -27,6 +27,7 @@ export function RelationshipForm({ tenantId, onSuccess, onCancel }: Props) {
   const [sourceDisplayName, setSourceDisplayName] = useState('');
   const [targetDisplayName, setTargetDisplayName] = useState('');
   const [propertyName, setPropertyName] = useState('');
+  const [processFlag, setProcessFlag] = useState('');
   const [junctionDisplayName, setJunctionDisplayName] = useState('');
 
   // Get selected object types
@@ -94,6 +95,7 @@ export function RelationshipForm({ tenantId, onSuccess, onCancel }: Props) {
     try {
       await createRelationship(tenantId, {
         displayName: displayName.trim(),
+        processFlag: processFlag.trim() || undefined,
         cardinality,
         sourceObjectTypeId,
         targetObjectTypeId,
@@ -164,6 +166,16 @@ export function RelationshipForm({ tenantId, onSuccess, onCancel }: Props) {
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="e.g., Employee Works On Project"
             required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Process Flag (Grouping)</label>
+          <Input
+            type="text"
+            value={processFlag}
+            onChange={(e) => setProcessFlag(e.target.value)}
+            placeholder="e.g., Sales, Inventory"
           />
         </div>
       </div>

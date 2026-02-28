@@ -12,6 +12,7 @@
     "metaflow:demo:apply": "node tools/metaflow-generator/apply-json-to-supabase.mjs examples/metaflow/deal-pipeline.demo.json",
     "metaflow:demo:loop": "node tools/metaflow-generator/run-demo-loop.mjs",
     "metaflow:agent": "node tools/metaflow-generator/agent/run-agent-loop.mjs",
+    "metaflow:gemini": "node tools/metaflow-generator/generate.mjs",
     "metaflow:default:export": "node tools/metaflow-generator/export-supabase-to-json.mjs 00000000-0000-0000-0000-000000000001 examples/metaflow/deal-pipeline.default.export.json \"Deal Pipeline\"",
     "metaflow:default:sql": "node tools/metaflow-generator/convert-json-to-sql.mjs examples/metaflow/deal-pipeline.default.json examples/metaflow/deal-pipeline.default.sql",
     "metaflow:default:apply": "node tools/metaflow-generator/apply-json-to-supabase.mjs examples/metaflow/deal-pipeline.default.json"

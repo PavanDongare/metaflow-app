@@ -108,6 +108,7 @@ function applyOperation(spec, op) {
     spec.objectTypes.push({
       symbolicId: op.symbolicId,
       displayName: op.displayName,
+      processFlag: op.processFlag,
       config: {
         titleKey: op.titleKey || 'name',
         primaryKey: op.primaryKey || 'id',
@@ -135,7 +136,9 @@ function applyOperation(spec, op) {
     }
     const exists = spec.relationships.find((r) => r?.symbolicId === op.symbolicId);
     if (exists) return;
-    spec.relationships.push(op.relationship);
+    const rel = op.relationship;
+    if (op.processFlag && !rel.processFlag) rel.processFlag = op.processFlag;
+    spec.relationships.push(rel);
     return;
   }
 
@@ -145,7 +148,9 @@ function applyOperation(spec, op) {
       throw new Error('create_action missing action payload');
     }
     if (getAction(spec, op.symbolicId)) return;
-    spec.actions.push(op.action);
+    const action = op.action;
+    if (op.processFlag && !action.processFlag) action.processFlag = op.processFlag;
+    spec.actions.push(action);
     return;
   }
 
@@ -153,7 +158,9 @@ function applyOperation(spec, op) {
     if (!op.symbolicId) throw new Error('replace_action missing symbolicId');
     const idx = spec.actions.findIndex((a) => a.symbolicId === op.symbolicId);
     if (idx === -1) throw new Error(`replace_action target not found: ${op.symbolicId}`);
-    spec.actions[idx] = op.action;
+    const action = op.action;
+    if (op.processFlag && !action.processFlag) action.processFlag = op.processFlag;
+    spec.actions[idx] = action;
     return;
   }
 
@@ -189,10 +196,13 @@ function applyOperation(spec, op) {
       throw new Error('upsert_process_layout missing processLayout payload');
     }
     const existing = spec.processLayouts.find((p) => p.symbolicId === op.processLayout.symbolicId || p.processName === op.processLayout.processName);
+    const pl = op.processLayout;
+    if (op.processFlag && !pl.processFlag) pl.processFlag = op.processFlag;
+
     if (existing) {
-      Object.assign(existing, op.processLayout);
+      Object.assign(existing, pl);
     } else {
-      spec.processLayouts.push(op.processLayout);
+      spec.processLayouts.push(pl);
     }
     return;
   }
@@ -285,6 +295,28 @@ function autoResolveProcessLayout(spec) {
     actionIds: ensureArray(spec.actions).map((a) => a?.symbolicId).filter(Boolean),
   });
   return 1;
+}
+
+function autoResolveProcessFlag(spec) {
+  const primaryProcess = spec.processLayouts[0];
+  if (!primaryProcess) return 0;
+  const flag = primaryProcess.processFlag || primaryProcess.processName.replace(/\s+/g, '');
+  if (!primaryProcess.processFlag) primaryProcess.processFlag = flag;
+
+  let changed = 0;
+  for (const o of spec.objectTypes) {
+    if (!o.processFlag) { o.processFlag = flag; changed++; }
+  }
+  for (const r of spec.relationships) {
+    if (!r.processFlag) { r.processFlag = flag; changed++; }
+  }
+  for (const a of spec.actions) {
+    if (!a.processFlag) { a.processFlag = flag; changed++; }
+  }
+  for (const p of spec.processLayouts) {
+    if (!p.processFlag) { p.processFlag = flag; changed++; }
+  }
+  return changed;
 }
 
 function autoFillTransitionSubmissionCriteria(spec) {
@@ -991,6 +1023,7 @@ async function main() {
 
     applied += autoResolveMissingSymbolicRefs(spec);
     applied += autoResolveProcessLayout(spec);
+    applied += autoResolveProcessFlag(spec);
     sanitizeSpecForPersistence(spec);
     applied += autoFillTransitionSubmissionCriteria(spec);
     validation = validateSpec(spec);
@@ -1007,6 +1040,7 @@ async function main() {
   fs.mkdirSync(path.dirname(cfg.output) || 'examples/metaflow', { recursive: true });
   autoResolveMissingSymbolicRefs(spec);
   autoResolveProcessLayout(spec);
+  autoResolveProcessFlag(spec);
   sanitizeSpecForPersistence(spec);
   autoFillTransitionSubmissionCriteria(spec);
   fs.writeFileSync(cfg.output, `${JSON.stringify(spec, null, 2)}\n`, 'utf8');

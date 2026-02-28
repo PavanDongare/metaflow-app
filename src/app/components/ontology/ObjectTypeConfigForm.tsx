@@ -177,19 +177,36 @@ export function ObjectTypeConfigForm({ value, onChange }: Props) {
       {/* Basic Info */}
       <div className="bg-card border rounded-lg p-5">
         <h3 className="text-sm font-semibold mb-4">Basic Information</h3>
-        <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
-            Display Name <span className="text-destructive">*</span>
-          </label>
-          <Input
-            value={value.displayName || ''}
-            onChange={(e) => onChange({ ...value, displayName: e.target.value })}
-            placeholder="e.g., Customer, Product, Order"
-            className="h-9"
-          />
-          <p className="text-xs text-muted-foreground mt-1">
-            Human-readable name for this entity type
-          </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
+              Display Name <span className="text-destructive">*</span>
+            </label>
+            <Input
+              value={value.displayName || ''}
+              onChange={(e) => onChange({ ...value, displayName: e.target.value })}
+              placeholder="e.g., Customer, Product, Order"
+              className="h-9"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Human-readable name for this entity type
+            </p>
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
+              Process Flag (Grouping)
+            </label>
+            <Input
+              value={value.processFlag || ''}
+              onChange={(e) => onChange({ ...value, processFlag: e.target.value })}
+              placeholder="e.g., Sales, Inventory"
+              className="h-9"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Business process this entity belongs to
+            </p>
+          </div>
         </div>
       </div>
 

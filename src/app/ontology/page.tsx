@@ -1,13 +1,23 @@
 'use client';
 
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Plus, Settings, Database, ArrowRight, Loader2 } from 'lucide-react';
+import { Plus, Settings, Database, ArrowRight, Loader2, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useObjectTypes } from '../lib/hooks';
+import { useTenant } from '@/lib/auth/tenant-context';
 
 export default function OntologyPage() {
+  const { processFilter } = useTenant();
   const { objectTypes, loading, error, refetch } = useObjectTypes();
+
+  // Filtered data
+  const filteredTypes = useMemo(() => 
+    processFilter === 'all' ? objectTypes : objectTypes.filter(t => t.processFlag === processFilter),
+    [objectTypes, processFilter]
+  );
 
   if (loading) {
     return (
@@ -31,14 +41,20 @@ export default function OntologyPage() {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Object Types</h1>
           <p className="text-muted-foreground">
             Define and manage your data schema
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {processFilter !== 'all' && (
+            <Badge variant="outline" className="px-3 py-1 h-auto text-sm font-bold border-primary/30 text-primary mr-2 uppercase">
+              {processFilter}
+            </Badge>
+          )}
+          
           <Link href="/ontology/relationships">
             <Button variant="outline">
               <ArrowRight className="w-4 h-4 mr-2" />
@@ -61,25 +77,31 @@ export default function OntologyPage() {
       </div>
 
       {/* Object Types List */}
-      {objectTypes.length === 0 ? (
+      {filteredTypes.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Database className="w-12 h-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No Object Types</h3>
+            <h3 className="text-lg font-medium mb-2">
+              {processFilter === 'all' ? 'No Object Types' : `No Object Types in ${processFilter}`}
+            </h3>
             <p className="text-muted-foreground text-center mb-4">
-              Get started by creating your first object type
+              {processFilter === 'all' 
+                ? 'Get started by creating your first object type' 
+                : `No object types are currently flagged as ${processFilter}`}
             </p>
-            <Link href="/ontology/new">
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Create Object Type
-              </Button>
-            </Link>
+            {processFilter === 'all' && (
+              <Link href="/ontology/new">
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Object Type
+                </Button>
+              </Link>
+            )}
           </CardContent>
         </Card>
       ) : (
         <div className="border rounded-lg divide-y bg-card">
-          {objectTypes
+          {filteredTypes
             .slice()
             .sort((a, b) => a.displayName.localeCompare(b.displayName))
             .map((type) => {
@@ -96,7 +118,14 @@ export default function OntologyPage() {
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
-                      <p className="font-medium">{type.displayName}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium">{type.displayName}</p>
+                        {type.processFlag && (
+                          <Badge variant="secondary" className="text-[10px] h-4 px-1.5 uppercase">
+                            {type.processFlag}
+                          </Badge>
+                        )}
+                      </div>
                       <p className="text-xs text-muted-foreground mt-1">
                         {propertyCount} properties, {requiredCount} required, {referenceCount} references, {picklistCount} picklists
                       </p>

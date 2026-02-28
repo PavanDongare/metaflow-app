@@ -1,10 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Plus, ArrowLeft, ArrowRight, Trash2, Loader2 } from 'lucide-react';
+import { Plus, ArrowLeft, ArrowRight, Trash2, Loader2, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useTenant } from '@/lib/auth/tenant-context';
 import { useRelationships, useObjectTypes } from '../../lib/hooks';
 import { deleteRelationship } from '../../lib/queries/relationships';
@@ -23,13 +31,19 @@ const CARDINALITY_COLORS = {
 };
 
 export default function RelationshipsPage() {
-  const { tenantId } = useTenant();
+  const { tenantId, processFilter } = useTenant();
   const { relationships, loading: relsLoading, error: relsError, refetch } = useRelationships();
   const { objectTypes, loading: typesLoading } = useObjectTypes();
   const [showForm, setShowForm] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
 
   const loading = relsLoading || typesLoading;
+
+  // Filtered data
+  const filteredRels = useMemo(() => 
+    processFilter === 'all' ? relationships : relationships.filter(r => r.processFlag === processFilter),
+    [relationships, processFilter]
+  );
 
   const getTypeName = (id: string) => {
     const type = objectTypes.find(t => t.id === id);
@@ -63,7 +77,7 @@ export default function RelationshipsPage() {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Link href="/ontology">
             <Button variant="ghost" size="icon">
@@ -77,12 +91,19 @@ export default function RelationshipsPage() {
             </p>
           </div>
         </div>
-        {!showForm && (
-          <Button onClick={() => setShowForm(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            New Relationship
-          </Button>
-        )}
+        <div className="flex items-center gap-3">
+          {processFilter !== 'all' && (
+            <Badge variant="outline" className="px-3 py-1 h-auto text-sm font-bold border-primary/30 text-primary uppercase">
+              {processFilter}
+            </Badge>
+          )}
+          {!showForm && (
+            <Button onClick={() => setShowForm(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              New Relationship
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Error */}
@@ -115,15 +136,19 @@ export default function RelationshipsPage() {
       )}
 
       {/* Relationships List */}
-      {relationships.length === 0 ? (
+      {filteredRels.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <ArrowRight className="w-12 h-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No Relationships</h3>
+            <h3 className="text-lg font-medium mb-2">
+              {processFilter === 'all' ? 'No Relationships' : `No Relationships in ${processFilter}`}
+            </h3>
             <p className="text-muted-foreground text-center mb-4">
-              Create relationships to connect your object types
+              {processFilter === 'all' 
+                ? 'Create relationships to connect your object types' 
+                : `No relationships are currently flagged as ${processFilter}`}
             </p>
-            {!showForm && (
+            {processFilter === 'all' && !showForm && (
               <Button onClick={() => setShowForm(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Relationship
@@ -133,7 +158,7 @@ export default function RelationshipsPage() {
         </Card>
       ) : (
         <div className="space-y-3">
-          {relationships.map((rel) => (
+          {filteredRels.map((rel) => (
             <Card key={rel.id}>
               <CardContent className="flex items-center justify-between py-4">
                 <div className="flex items-center gap-4">
@@ -145,7 +170,14 @@ export default function RelationshipsPage() {
                     {CARDINALITY_LABELS[rel.cardinality]}
                   </span>
                   <div>
-                    <div className="font-medium">{rel.displayName}</div>
+                    <div className="flex items-center gap-2">
+                      <div className="font-medium">{rel.displayName}</div>
+                      {rel.processFlag && processFilter === 'all' && (
+                        <Badge variant="secondary" className="text-[10px] h-4 px-1.5 uppercase">
+                          {rel.processFlag}
+                        </Badge>
+                      )}
+                    </div>
                     <div className="text-sm text-muted-foreground">
                       {getTypeName(rel.sourceObjectTypeId)} <ArrowRight className="inline w-3 h-3" /> {getTypeName(rel.targetObjectTypeId)}
                     </div>

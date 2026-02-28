@@ -13,6 +13,7 @@
     {
       "symbolicId": "$company",
       "displayName": "Company",
+      "processFlag": "Sales",
       "config": {
         "titleKey": "name",
         "primaryKey": "id",
@@ -33,6 +34,7 @@
     {
       "symbolicId": "$contact",
       "displayName": "Contact",
+      "processFlag": "Sales",
       "config": {
         "titleKey": "fullName",
         "primaryKey": "id",
@@ -53,6 +55,7 @@
     {
       "symbolicId": "$deal",
       "displayName": "Deal",
+      "processFlag": "Sales",
       "config": {
         "titleKey": "name",
         "primaryKey": "id",
@@ -131,6 +134,7 @@
     {
       "symbolicId": "$deal_contact_link",
       "displayName": "Deal Contact Link",
+      "processFlag": "Sales",
       "config": {
         "titleKey": "role",
         "isJunction": true,
@@ -183,6 +187,7 @@
     {
       "symbolicId": "$company_has_deals",
       "displayName": "Company has Deals",
+      "processFlag": "Sales",
       "cardinality": "ONE_TO_MANY",
       "sourceObjectTypeId": "$company",
       "targetObjectTypeId": "$deal",
@@ -196,6 +201,7 @@
     {
       "symbolicId": "$deal_contacts",
       "displayName": "Deal Contacts",
+      "processFlag": "Sales",
       "cardinality": "MANY_TO_MANY",
       "sourceObjectTypeId": "$deal",
       "targetObjectTypeId": "$contact",
@@ -211,6 +217,7 @@
     {
       "symbolicId": "$close_lost",
       "displayName": "Close Lost",
+      "processFlag": "Sales",
       "config": {
         "rules": [
           {
@@ -275,6 +282,7 @@
     {
       "symbolicId": "$close_won",
       "displayName": "Close Won",
+      "processFlag": "Sales",
       "config": {
         "rules": [
           {
@@ -343,6 +351,7 @@
     {
       "symbolicId": "$create_proposal",
       "displayName": "Create Proposal",
+      "processFlag": "Sales",
       "config": {
         "rules": [
           {
@@ -417,6 +426,7 @@
     {
       "symbolicId": "$link_contact_to_deal",
       "displayName": "Link Contact To Deal",
+      "processFlag": "Sales",
       "config": {
         "rules": [
           {
@@ -550,6 +560,7 @@
     {
       "symbolicId": "$log_follow_up_note",
       "displayName": "Log Follow-up Note",
+      "processFlag": "Sales",
       "config": {
         "rules": [
           {
@@ -588,6 +599,7 @@
     {
       "symbolicId": "$qualify_deal",
       "displayName": "Qualify Deal",
+      "processFlag": "Sales",
       "config": {
         "rules": [
           {
@@ -670,6 +682,7 @@
     {
       "symbolicId": "$start_negotiation",
       "displayName": "Start Negotiation",
+      "processFlag": "Sales",
       "config": {
         "rules": [
           {
@@ -736,6 +749,7 @@
     {
       "symbolicId": "$process_deal_pipeline",
       "processName": "Deal Pipeline",
+      "processFlag": "Sales",
       "objectTypeIds": [
         "$deal"
       ],

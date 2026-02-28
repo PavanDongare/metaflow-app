@@ -9,6 +9,7 @@ function mapActionType(row: Record<string, unknown>): ActionType {
     id: row.id as string,
     tenantId: row.tenant_id as string,
     displayName: row.display_name as string,
+    processFlag: row.process_flag as string,
     config: row.config as ActionTypeConfig,
     createdAt: new Date(row.created_at as string),
     updatedAt: new Date(row.updated_at as string),
@@ -50,6 +51,7 @@ export async function createActionType(
   tenantId: string,
   input: {
     displayName: string;
+    processFlag?: string;
     config: ActionTypeConfig;
   }
 ): Promise<ActionType> {
@@ -63,6 +65,7 @@ export async function createActionType(
     .insert({
       tenant_id: tenantId,
       display_name: input.displayName,
+      process_flag: input.processFlag,
       config: input.config,
     })
     .select()
@@ -76,13 +79,14 @@ export async function createActionType(
 export async function updateActionType(
   id: string,
   tenantId: string,
-  updates: { displayName?: string; config?: ActionTypeConfig }
+  updates: { displayName?: string; processFlag?: string; config?: ActionTypeConfig }
 ): Promise<ActionType> {
   const updateData: Record<string, unknown> = {
     updated_at: new Date().toISOString(),
   };
 
   if (updates.displayName) updateData.display_name = updates.displayName;
+  if (updates.processFlag !== undefined) updateData.process_flag = updates.processFlag;
   if (updates.config) updateData.config = updates.config;
 
   const supabase = getSupabase('metaflow');
@@ -122,6 +126,7 @@ export async function listActions(tenantId: string): Promise<ActionListItem[]> {
   return (data || []).map((row: Record<string, unknown>) => ({
     id: row.id as string,
     displayName: row.display_name as string,
+    processFlag: row.process_flag as string,
     executionType: row.execution_type as 'declarative' | 'function-backed',
     parameters: row.parameters as ActionTypeConfig['parameters'],
     description: row.description as string | undefined,

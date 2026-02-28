@@ -47,6 +47,7 @@ export default function NewActionPage() {
   const { objectTypes } = useObjectTypes();
 
   const [displayName, setDisplayName] = useState('');
+  const [processFlag, setProcessFlag] = useState('');
   const [description, setDescription] = useState('');
   const [executionType, setExecutionType] = useState<'declarative' | 'function-backed'>('declarative');
   const [functionName, setFunctionName] = useState('');
@@ -526,6 +527,7 @@ export default function NewActionPage() {
 
       const created = await createActionType(tenantId, {
         displayName,
+        processFlag: processFlag.trim() || undefined,
         config,
       });
 
@@ -569,14 +571,26 @@ export default function NewActionPage() {
           <CardTitle>Basic Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="displayName">Display Name *</Label>
-            <Input
-              id="displayName"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="e.g., Approve Order"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="displayName">Display Name *</Label>
+              <Input
+                id="displayName"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="e.g., Approve Order"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="processFlag">Process Flag (Grouping)</Label>
+              <Input
+                id="processFlag"
+                value={processFlag}
+                onChange={(e) => setProcessFlag(e.target.value)}
+                placeholder="e.g., Sales, Inventory"
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
