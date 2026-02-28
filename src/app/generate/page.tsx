@@ -185,10 +185,9 @@ export default function AIBuilderPage() {
                 </SelectItem>
                 <div className="h-px bg-muted my-1" />
                 {configs.map(c => (
-                  <SelectItem key={c} value={c}>{c}.json</SelectItem>
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
                 ))}
-              </SelectContent>
-            </Select>
+              </SelectContent>            </Select>
             <Button 
               variant="ghost" 
               size="icon" 
@@ -261,7 +260,7 @@ export default function AIBuilderPage() {
             <div className="flex items-center gap-2">
               <FileJson className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm font-semibold truncate">
-                {selectedConfig}.json
+                {selectedConfig || 'No Process Selected'}
               </span>
             </div>
             {config && <Badge variant="secondary" className="text-[9px]">v{config.version}</Badge>}
