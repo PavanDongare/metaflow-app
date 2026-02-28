@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useTenant } from '@/lib/auth/tenant-context';
-import { listConfigs, getConfig } from './actions';
+
+const REMOTE_URL = 'http://161.97.133.172:3005';
 
 export default function AIBuilderPage() {
   const { tenantId } = useTenant();
@@ -31,10 +32,15 @@ export default function AIBuilderPage() {
 
   // Load configs list
   const loadConfigs = useCallback(async () => {
-    const list = await listConfigs();
-    setConfigs(list);
-    if (list.length > 0 && !selectedConfig) {
-      setSelectedConfig(list[0]);
+    try {
+      const response = await fetch(`${REMOTE_URL}/list`);
+      const list = await response.json();
+      setConfigs(list);
+      if (list.length > 0 && !selectedConfig) {
+        setSelectedConfig(list[0]);
+      }
+    } catch (err) {
+      console.error('Failed to load configs from remote server', err);
     }
   }, [selectedConfig]);
 
@@ -45,7 +51,10 @@ export default function AIBuilderPage() {
   // Load selected config details
   useEffect(() => {
     if (selectedConfig) {
-      getConfig(selectedConfig).then(setConfig);
+      fetch(`${REMOTE_URL}/config?name=${selectedConfig}`)
+        .then(res => res.json())
+        .then(setConfig)
+        .catch(err => console.error('Failed to load config details', err));
     }
   }, [selectedConfig]);
 
@@ -68,7 +77,7 @@ export default function AIBuilderPage() {
     }
 
     try {
-      const response = await fetch('/api/generate', {
+      const response = await fetch(`${REMOTE_URL}/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: finalPrompt, tenantId, configName: finalConfigName, isNew }),
