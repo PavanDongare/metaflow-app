@@ -220,16 +220,17 @@ export default function AIBuilderPage() {
         <div className="flex-1 flex flex-col border-r bg-black/5 min-h-0">
           <div className="flex-1 relative overflow-hidden flex flex-col p-4 gap-4 min-h-0">
              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground px-2 shrink-0">
-               <Terminal className="w-3.5 h-3.5" /> Architect Logs
+               <Database className="w-3.5 h-3.5" />
+               Architecture Evolution Log
              </div>
-             <ScrollArea className="flex-1 bg-black text-zinc-300 font-mono text-xs p-4 rounded-lg border border-zinc-800 shadow-inner">
+
+             <ScrollArea className="flex-1 bg-white text-zinc-900 font-sans text-sm p-6 rounded-xl border border-zinc-200 shadow-sm">
                <div className="whitespace-pre-wrap leading-relaxed pb-4">
-                 {log || `Stateless system ready. Select a process from Supabase to begin.`}
+                 {log || `Architect ready. Select a process from Supabase to begin.`}
                  <div ref={logEndRef} />
                </div>
              </ScrollArea>
           </div>
-
           <div className="p-4 bg-background border-t shrink-0">
             <form onSubmit={handleUpdateSubmit} className="flex gap-2 max-w-4xl mx-auto">
               <Input

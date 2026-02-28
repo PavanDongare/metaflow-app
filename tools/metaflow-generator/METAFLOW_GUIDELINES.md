@@ -18,8 +18,9 @@ Follow these rules to generate a valid, production-grade MetaFlow configuration.
 - **Submission Criteria**: Use as a guard to prevent actions from running in the wrong context.
 
 ## Relationship Semantics
-- Use `MANY_TO_ONE` or `ONE_TO_MANY` for simple links.
-- Use `MANY_TO_MANY` with a `junctionObjectTypeId` when the relationship itself needs attributes (e.g., a "Role" on a deal contact).
+- **Cardinality (MANDATORY)**: Every relationship MUST have a `cardinality` property set to one of: `'ONE_TO_MANY'`, `'MANY_TO_ONE'`, or `'MANY_TO_MANY'`.
+- **Property Name**: For `ONE_TO_MANY` or `MANY_TO_ONE`, you MUST provide a `propertyName` (the foreign key column name).
+- Use `MANY_TO_MANY` with a `junctionObjectTypeId` when the relationship itself needs attributes.
 
 ## Process Layout
 - Every configuration must include a `processLayout` that references the pipeline object.

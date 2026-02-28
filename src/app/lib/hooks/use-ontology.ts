@@ -20,9 +20,38 @@ import {
   deleteObject as deleteObjectFn,
 } from '../queries/objects';
 
+import {
+  getProjectFlags,
+  getProjectSnapshot,
+  upsertProjectSnapshot,
+} from '../queries/snapshots';
+
 // ==========================================
 // Object Types Hooks
 // ==========================================
+
+export function useProjectFlags() {
+  const [flags, setFlags] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const refetch = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await getProjectFlags();
+      setFlags(data);
+    } catch (err) {
+      console.error('Failed to fetch project flags', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  return { flags, loading, refetch };
+}
 
 export function useObjectTypes() {
   const { tenantId } = useTenant();

@@ -86,12 +86,14 @@ async function main() {
     if (error) throw new Error(`Object types upsert failed: ${error.message}`);
   }
 
-  const relationshipRows = (spec.relationships || []).map((r) => ({
+  const relationshipRows = (spec.relationships || [])
+    .filter(r => r.sourceObjectTypeId && r.targetObjectTypeId)
+    .map((r) => ({
     id: idMap.get(r.symbolicId),
     tenant_id: tenant.id,
     display_name: r.displayName,
     process_flag: r.processFlag || null,
-    cardinality: r.cardinality,
+    cardinality: r.cardinality || 'ONE_TO_MANY',
     source_object_type_id: replaceSymbolsDeep(r.sourceObjectTypeId),
     target_object_type_id: replaceSymbolsDeep(r.targetObjectTypeId),
     source_display_name: r.sourceDisplayName,

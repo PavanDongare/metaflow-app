@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useTenant } from '@/lib/auth/tenant-context';
-import { useObjectTypes } from '../lib/hooks/use-ontology';
+import { useObjectTypes, useProjectFlags } from '../lib/hooks/use-ontology';
 import { useProcessLayouts } from '../lib/hooks/use-process';
 import { useRelationships } from '../lib/hooks/use-relationships';
 import { useActionTypes } from '../lib/hooks/use-actions';
@@ -43,20 +43,37 @@ export function MetaflowNav({
   const { processFilter, setProcessFilter } = useTenant();
   const isVertical = orientation === 'vertical';
 
-  // Fetch data to extract all unique process flags
+  // Fetch all possible sources of process flags
   const { objectTypes } = useObjectTypes();
   const { layouts } = useProcessLayouts();
   const { relationships } = useRelationships();
   const { actionTypes } = useActionTypes();
+  const { flags: snapshotFlags } = useProjectFlags();
 
   const processFlags = useMemo(() => {
-    const flags = new Set<string>();
-    objectTypes.forEach(t => t.processFlag && flags.add(t.processFlag));
-    layouts.forEach(l => l.processFlag && flags.add(l.processFlag));
-    relationships.forEach(r => r.processFlag && flags.add(r.processFlag));
-    actionTypes.forEach(a => a.processFlag && flags.add(a.processFlag));
-    return Array.from(flags).sort();
-  }, [objectTypes, layouts, relationships, actionTypes]);
+    const rawFlags = new Set<string>();
+    
+    // Add from all normalized tables
+    objectTypes.forEach(t => t.processFlag && rawFlags.add(t.processFlag));
+    layouts.forEach(l => l.processFlag && rawFlags.add(l.processFlag));
+    relationships.forEach(r => r.processFlag && rawFlags.add(r.processFlag));
+    actionTypes.forEach(a => a.processFlag && rawFlags.add(a.processFlag));
+    
+    // Add from snapshots (Architect blueprints)
+    snapshotFlags.forEach(f => rawFlags.add(f));
+
+    // Normalize to handle case sensitivity issues (e.g., "kanban" vs "Kanban")
+    const normalized = new Map<string, string>();
+    Array.from(rawFlags).forEach(f => {
+      const lower = f.toLowerCase();
+      // Keep the one that has an uppercase first letter if possible
+      if (!normalized.has(lower) || (f[0] === f[0].toUpperCase())) {
+        normalized.set(lower, f);
+      }
+    });
+
+    return Array.from(normalized.values()).sort();
+  }, [objectTypes, layouts, relationships, actionTypes, snapshotFlags]);
 
   return (
     <div
