@@ -131,8 +131,6 @@ export function MetaflowNav({
                   isVertical
                     ? 'mx-2 my-0.5 px-3 py-2 text-sm rounded-md transition-colors'
                     : 'px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors',
-                  item.featured && isVertical && 'bg-primary/10 text-primary border border-primary/20',
-                  item.featured && !isVertical && 'text-primary',
                   isActive
                     ? isVertical
                       ? 'bg-muted text-foreground'

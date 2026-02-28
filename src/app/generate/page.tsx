@@ -114,9 +114,24 @@ export default function AIBuilderPage() {
         // 1. Update Snapshot in DB
         await upsertProjectSnapshot(flag, tenantId, updatedConfig);
         
-        // 2. Note: Ideally we call a "Sync Normalized Tables" script here
-        // For now, since the apply script is on the server, we might need a /sync endpoint
-        // or just let the user know it's saved as a snapshot.
+        // 2. Sync to normalized tables via remote server
+        const syncResponse = await fetch(`${COMPUTE_URL}/sync`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ config: updatedConfig }),
+        });
+
+        if (syncResponse.ok) {
+          const syncReader = syncResponse.body?.getReader();
+          if (syncReader) {
+            const syncDecoder = new TextDecoder();
+            while (true) {
+              const { done, value } = await syncReader.read();
+              if (done) break;
+              setLog(prev => prev + syncDecoder.decode(value, { stream: true }));
+            }
+          }
+        }
         
         setLog(prev => prev + `✅ Project ${flag} synchronized to Supabase.\n`);
         setStatus('success');

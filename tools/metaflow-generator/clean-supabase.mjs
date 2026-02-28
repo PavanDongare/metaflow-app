@@ -21,6 +21,7 @@ async function main() {
   const tables = [
     'action_log',
     'objects',
+    'project_snapshots',
     'process_layouts',
     'action_types',
     'relationships',
