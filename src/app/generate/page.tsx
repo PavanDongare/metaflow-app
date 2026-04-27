@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useTenant } from '@/lib/auth/tenant-context';
 import { getProjectFlags, getProjectSnapshot, upsertProjectSnapshot } from '../lib/queries/snapshots';
 
-const COMPUTE_URL = 'http://161.97.133.172:3005';
+const COMPUTE_URL = process.env.NEXT_PUBLIC_METAFLOW_COMPUTE_URL ?? 'https://metaflow.pavandongare.com';
 
 export default function AIBuilderPage() {
   const { tenantId } = useTenant();
